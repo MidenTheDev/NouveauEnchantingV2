@@ -1,0 +1,23 @@
+sharpness:
+  max-level: 5
+  allowed-items:
+    - "#Swords"
+    - "#Axes"
+power:
+  max-level: 5
+  allowed-items:
+    - "bow"
+    - "crossbow"
+fortune:
+  max-level: 3
+  allowed-items:
+    - "pickaxes"
+    - "axes"
+    - ""
+looting:
+  max-level: 3
+  allowed-items:
+    - "swords"
+    - "spears"
+    - "bow"
+    - "crossbow"

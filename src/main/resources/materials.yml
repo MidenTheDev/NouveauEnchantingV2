@@ -1,0 +1,56 @@
+DIAMOND:
+  sharpness:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 4
+      material-cost: 4
+    3:
+      level-cost: 4
+      material-cost: 4
+    4:
+      level-cost: 4
+      material-cost: 4
+    5:
+      level-cost: 4
+      material-cost: 4
+  power:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 4
+      material-cost: 4
+    3:
+      level-cost: 4
+      material-cost: 4
+    4:
+      level-cost: 4
+      material-cost: 4
+    5:
+      level-cost: 4
+      material-cost: 4
+
+
+LAPIS_LAZULI:
+  fortune:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 4
+      material-cost: 4
+    3:
+      level-cost: 4
+      material-cost: 4
+  looting:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 4
+      material-cost: 4
+    3:
+      level-cost: 4
+      material-cost: 4

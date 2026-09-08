@@ -1,0 +1,16 @@
+name: NouveauEnchanting
+version: '${version}'
+main: us.to.midensthings.nouveauEnchanting.NouveauEnchanting
+api-version: '26.1.2'
+bootstrapper: us.to.midensthings.nouveauEnchanting.NouveauEnchantingBootstrapper
+
+commands:
+  nedebug:
+    description: "Debug command for Nouveau Enchanting"
+    usage: "/nedebug"
+    permission: nouveauenchanting.commands.debug
+
+permissions:
+  nouveauenchanting.commands.debug:
+    default: op
+    description: "Allows use of debug commands."

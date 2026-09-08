@@ -1,0 +1,5 @@
+config-version: '1.0'
+#do not change this unless you really know what you're doing!
+
+override-enchanting-table: true
+#replace the vanilla enchanting table with the custom enchanting gui.
