@@ -4,6 +4,7 @@ import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import io.papermc.paper.plugin.bootstrap.PluginProviderContext;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.registry.TypedKey;
 import io.papermc.paper.registry.event.RegistryEvents;
@@ -21,6 +22,7 @@ import org.bukkit.Registry;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.slf4j.LoggerFactory;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantMaterial;
 import us.to.midensthings.nouveauEnchanting.enchanting.MaterialRegistry;
 
@@ -37,13 +39,17 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 public class NouveauEnchantingBootstrapper implements PluginBootstrap {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(NouveauEnchantingBootstrapper.class);
     MaterialRegistry materialRegistry;
     YamlConfiguration materialsConf;
     YamlConfiguration enchantsConf;
+    YamlConfiguration tagsConf;
     Path dataDirectory;
     ComponentLogger logger;
     File materialsYml;
     File enchantsYml;
+    File tagsYml;
+
 
 
     @Override
@@ -52,12 +58,15 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
         dataDirectory = context.getDataDirectory();
         materialsYml = dataDirectory.resolve("materials.yml").toFile();
         enchantsYml = dataDirectory.resolve("enchants.yml").toFile();
+        tagsYml = dataDirectory.resolve("tags.yml").toFile();
 
         generateFile(materialsYml, "materials.yml");
         generateFile(enchantsYml, "enchants.yml");
+        generateFile(tagsYml, "tags.yml");
 
         materialsConf = YamlConfiguration.loadConfiguration(materialsYml);
         enchantsConf = YamlConfiguration.loadConfiguration(enchantsYml);
+        tagsConf = YamlConfiguration.loadConfiguration(tagsYml);
 
 
         // Fill in material registry
@@ -73,23 +82,21 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
             materialRegistry.addMaterial(material, enchantMaterial);
         });
 
+
         // Modify vanilla enchants according to enchants.yml
         enchantsConf.getConfigurationSection("").getKeys(false).forEach(enchant -> {
-            List<String> allowedItems = enchantsConf.getStringList(enchant+"allowed-items");
 
-            allowedItems.forEach(itemOrTag -> {
-                if (itemOrTag.substring(0,0).equals("#")) {
-                    // is a tag, add all items from tag to list
-                } else {
-                    // is an item, add all to list directly
-                }
+            RegistryKeySet<ItemType> allowedItems = createItemKeySet(tagsConf,enchantsConf.getStringList(enchant+".allowed-items"));
 
-            });
+            if (allowedItems.isEmpty()) {
+                logger.warn("Could not generate valid item list for enchant " + enchant);
+            }
 
             context.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.entryAdd()
                     // Set Max Level
                     .newHandler(event -> event.builder().maxLevel(enchantsConf.getInt(enchant+".max-level"))
-                            .suppo
+                            .supportedItems(allowedItems)
+
                     )
 
 
@@ -141,36 +148,38 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
 
     }
 
-    public  RegistryKeySet<ItemType> createItemKeySet(Registry<ItemType> itemRegistry, List<String> rawInputs) {
+    public  RegistryKeySet<ItemType> createItemKeySet(YamlConfiguration tagsConf, List<String> rawInputs) {
         List<TypedKey<ItemType>> resolvedKeys = new ArrayList<>();
 
         for (String input : rawInputs) {
             if (input == null || input.isBlank()) continue;
 
-            String trimmed = input.trim().toLowerCase();
+            String inputString = input.toLowerCase();
 
             // Handle Tags (e.g., "#swords" or "#minecraft:swords")
-            if (trimmed.startsWith("#")) {
-                String tagString = trimmed.substring(1);
-                NamespacedKey tagKey = parseNamespacedKey(tagString);
-                TagKey<ItemType> itemTagKey = TagKey.create(RegistryKey.ITEM, tagKey);
+            if (inputString.startsWith("#")) {
+                inputString = inputString.substring(1);
 
-                // Fetch tag contents and extract each ItemType's TypedKey
-                var tag = itemRegistry.getTag(itemTagKey);
-                if (tag != null) {
-                    for (TypedKey<ItemType> itemType : tag) {
-                        itemType.typedKey().ifPresent(resolvedKeys::add);
-                    }
+                // Check if the tag exists
+
+                if (tagsConf.getStringList(inputString) == null) {
+                    continue;
                 }
+
+                // Get all the itemtypes associated with the tag and add it to our key list.
+                tagsConf.getStringList(inputString).forEach(item -> {
+                    NamespacedKey itemKey = parseNamespacedKey(item);
+                    resolvedKeys.add(TypedKey.create(RegistryKey.ITEM, itemKey));
+                });
+
             }
             // Handle Direct Item Names (e.g., "diamond_sword")
             else {
-                NamespacedKey itemKey = parseNamespacedKey(trimmed);
+                NamespacedKey itemKey = parseNamespacedKey(inputString);
                 resolvedKeys.add(TypedKey.create(RegistryKey.ITEM, itemKey));
             }
         }
-
-        // Pass 2 parameters: RegistryKey and Iterable<TypedKey<ItemType>>
+        // Return registry key set from the resolved keys item list
         return RegistrySet.keySet(RegistryKey.ITEM, resolvedKeys);
     }
 

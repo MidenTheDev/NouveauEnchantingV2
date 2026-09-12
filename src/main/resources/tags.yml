@@ -1,0 +1,58 @@
+# Due to how the plugin is built, it is impossible to use regular vanilla item tags for enchants.
+# Therefore, the plugin requires its own tag system.
+# This system is provided by this file in order to allow for it to be fully customized
+
+swords:
+  - copper_sword
+  - diamond_sword
+  - golden_sword
+  - iron_sword
+  - netherite_sword
+  - stone_sword
+  - wooden_sword
+
+piackaxes:
+  - copper_pickaxe
+  - diamond_pickaxe
+  - golden_pickaxe
+  - iron_pickaxe
+  - netherite_pickaxe
+  - stone_pickaxe
+  - wooden_pickaxe
+
+axes:
+  - copper_axe
+  - diamond_axe
+  - golden_axe
+  - iron_axe
+  - netherite_axe
+  - stone_axe
+  - wooden_axe
+
+shovels:
+  - copper_shovel
+  - diamond_shovel
+  - golden_shovel
+  - iron_shovel
+  - netherite_shovel
+  - stone_shovel
+  - wooden_shovel
+
+hoes:
+  - copper_hoe
+  - diamond_hoe
+  - golden_hoe
+  - iron_hoe
+  - netherite_hoe
+  - stone_hoe
+  - wooden_hoe
+
+spears:
+  - copper_spear
+  - diamond_spear
+  - golden_spear
+  - iron_spear
+  - netherite_spear
+  - stone_spear
+  - wooden_spear
+
