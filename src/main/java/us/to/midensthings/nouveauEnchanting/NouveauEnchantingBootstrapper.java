@@ -76,10 +76,11 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
             EnchantMaterial enchantMaterial;
             // Check if the material exists and if it doesn't, check the compat instead
             try {
-                Material.valueOf(material);
+                Material.valueOf(material.toUpperCase());
                 // If it gets past this point, material exists. Register as vanilla EnchantMaterial
-                enchantMaterial = new EnchantMaterial(Material.valueOf(material), enchantKeys);
-                materialRegistry.addMaterial(material, enchantMaterial);
+                // toUpperCase allows for lowercase item IDs
+                enchantMaterial = new EnchantMaterial(Material.valueOf(material.toUpperCase()), enchantKeys);
+                materialRegistry.addMaterial(material.toUpperCase(), enchantMaterial);
             } catch (IllegalArgumentException e) {
                 // If it doesn't, there's no vanilla amterial. Check compats.
                 // First, check if there's a custom-material section.

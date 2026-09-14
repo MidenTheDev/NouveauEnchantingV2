@@ -1,4 +1,7 @@
-DIAMOND:
+refined_amethyst:
+  custom-material:
+    source: "itemsadder"
+    namespace: "myItems"
   sharpness:
     1:
       level-cost: 4
@@ -33,33 +36,43 @@ DIAMOND:
       material-cost: 4
 
 
-LAPIS_LAZULI:
-  fortune:
+HEART_OF_THE_SEA:
+  impaling:
     1:
       level-cost: 4
-      material-cost: 4
+      material-cost: 1
     2:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 6
+      material-cost: 1
     3:
-      level-cost: 4
-      material-cost: 4
-  looting:
+      level-cost: 8
+      material-cost: 1
+    4:
+      level-cost: 10
+      material-cost: 1
+    5:
+      level-cost: 12
+      material-cost: 1
+  luck_of_the_sea:
     1:
       level-cost: 4
-      material-cost: 4
+      material-cost: 1
     2:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 6
+      material-cost: 1
     3:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 8
+      material-cost: 1
+  aqua_affinity:
+    1:
+      level-cost: 8
+      material-cost: 1
 
-refined_amethyst:
+ruby:
   custom-material:
     source: "itemsadder"
-    namespace: "tbmcia"
-  protection:
+    namespace: "myItems"
+  smite:
     1:
       level-cost: 4
       material-cost: 4
@@ -72,3 +85,428 @@ refined_amethyst:
     4:
       level-cost: 4
       material-cost: 4
+    5:
+      level-cost: 4
+      material-cost: 4
+  fire_protection:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 4
+      material-cost: 4
+    3:
+      level-cost: 4
+      material-cost: 4
+    4:
+      level-cost: 4
+      material-cost: 4
+sapphire:
+  custom-material:
+    source: "itemsadder"
+    namespace: "myItems"
+  efficiency:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 4
+      material-cost: 4
+    3:
+      level-cost: 4
+      material-cost: 4
+    4:
+      level-cost: 4
+      material-cost: 4
+    5:
+      level-cost: 4
+      material-cost: 4
+
+moonstone:
+  custom-material:
+    source: "itemsadder"
+    namespace: "myItems"
+  lunge:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 8
+      material-cost: 5
+    3:
+      level-cost: 12
+      material-cost: 6
+  riptide:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 8
+      material-cost: 5
+    3:
+      level-cost: 12
+      material-cost: 6
+
+adamantium_ingot:
+  custom-material:
+    source: "itemsadder"
+    namespace: "myItems"
+  protection:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 8
+      material-cost: 5
+    3:
+      level-cost: 12
+      material-cost: 6
+    4:
+      level-cost: 16
+      material-cost: 8
+
+BREEZE_ROD:
+  wind_burst:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 4
+      material-cost: 4
+    3:
+      level-cost: 4
+      material-cost: 4
+    4:
+      level-cost: 4
+      material-cost: 4
+
+heavy_core:
+  density:
+    1:
+      level-cost: 4
+      material-cost: 1
+    2:
+      level-cost: 8
+      material-cost: 1
+    3:
+      level-cost: 8
+      material-cost: 2
+    4:
+      level-cost: 10
+      material-cost: 2
+    5:
+      level-cost: 12
+      material-cost: 3
+
+obsidian:
+  unbreaking:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 8
+      material-cost: 8
+    3:
+      level-cost: 12
+      material-cost: 8
+
+blaze_rod:
+  flame:
+    1:
+      level-cost: 10
+      material-cost: 4
+  fire_aspect:
+    1:
+      level-cost: 5
+      material-cost: 4
+    2:
+      level-cost: 8
+      material-cost: 4
+
+lapis_lazuli:
+  looting:
+    1:
+      level-cost: 6
+      material-cost: 8
+    2:
+      level-cost: 9
+      material-cost: 14
+    3:
+      level-cost: 12
+      material-cost: 28
+  fortune:
+    1:
+      level-cost: 6
+      material-cost: 8
+    2:
+      level-cost: 9
+      material-cost: 14
+    3:
+      level-cost: 12
+      material-cost: 28
+
+lightning_rod:
+  channeling:
+    1:
+      level-cost: 12
+      material-cost: 3
+
+nether_star:
+  mending:
+    1:
+      level-cost: 18
+      material-cost: 1
+
+fermented_spider_eye:
+  lure:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 4
+      material-cost: 5
+    3:
+      level-cost: 4
+      material-cost: 6
+
+ender_eye:
+  loyalty:
+    1:
+      level-cost: 4
+      material-cost: 2
+    2:
+      level-cost: 6
+      material-cost: 2
+    3:
+      level-cost: 8
+      material-cost: 3
+
+flint:
+  bane_of_arthopods:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 4
+      material-cost: 4
+    3:
+      level-cost: 4
+      material-cost: 4
+    4:
+      level-cost: 4
+      material-cost: 4
+    5:
+      level-cost: 4
+      material-cost: 4
+
+  projectile_protection:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 4
+      material-cost: 4
+    3:
+      level-cost: 4
+      material-cost: 4
+    4:
+      level-cost: 4
+      material-cost: 4
+
+shulker_shell:
+  feather_falling:
+    1:
+      level-cost: 4
+      material-cost: 2
+    2:
+      level-cost: 8
+      material-cost: 2
+    3:
+      level-cost: 8
+      material-cost: 3
+    4:
+      level-cost: 12
+      material-cost: 4
+
+popped_chorus_fruit:
+  vanishing_curse:
+    1:
+      level-cost: 8
+      material-cost: 3
+
+iron_chain:
+  binding_curse:
+    1:
+      level-cost: 8
+      material-cost: 4
+
+crying_obsidian:
+  blast_protection:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 4
+      material-cost: 4
+    3:
+      level-cost: 4
+      material-cost: 4
+    4:
+      level-cost: 4
+      material-cost: 4
+
+gilded_blackstone:
+  swift_sneak:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 6
+      material-cost: 4
+    3:
+      level-cost: 8
+      material-cost: 4
+
+
+nether_wart:
+  soul_speed:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 6
+      material-cost: 6
+    3:
+      level-cost: 8
+      material-cost: 8
+
+amethyst_shard:
+  thorns:
+    1:
+      level-cost: 4
+      material-cost: 8
+    2:
+      level-cost: 6
+      material-cost: 12
+    3:
+      level-cost: 8
+      material-cost: 16
+  piercing:
+    1:
+      level-cost: 4
+      material-cost: 8
+    2:
+      level-cost: 6
+      material-cost: 12
+    3:
+      level-cost: 8
+      material-cost: 16
+    4:
+      level-cost: 10
+      material-cost: 20
+
+slime_ball:
+  punch:
+    1:
+      level-cost: 4
+      material-cost: 3
+    2:
+      level-cost: 6
+      material-cost: 5
+  knockback:
+    1:
+      level-cost: 4
+      material-cost: 3
+    2:
+      level-cost: 6
+      material-cost: 5
+
+ender_pearl:
+  infinity:
+    1:
+      level-cost: 12
+      material-cost: 8
+
+resin_brick:
+  silk_touch:
+    1:
+      level-cost: 12
+      material-cost: 8
+
+sugar:
+  quick_charge:
+    1:
+      level-cost: 4
+      material-cost: 8
+    2:
+      level-cost: 6
+      material-cost: 12
+    3:
+      level-cost: 8
+      material-cost: 16
+
+prismarine_shard:
+  depth_strider:
+    1:
+      level-cost: 4
+      material-cost: 8
+    2:
+      level-cost: 6
+      material-cost: 12
+    3:
+      level-cost: 8
+      material-cost: 16
+
+spectral_arrow:
+  multishot:
+    1:
+      level-cost: 12
+      material-cost: 32
+
+
+nautilus_shell:
+  respiration:
+    1:
+      level-cost: 4
+      material-cost: 2
+    2:
+      level-cost: 6
+      material-cost: 2
+    3:
+      level-cost: 8
+      material-cost: 4
+
+diamond:
+  breach:
+    1:
+      level-cost: 4
+      material-cost: 8
+    2:
+      level-cost: 6
+      material-cost: 8
+    3:
+      level-cost: 8
+      material-cost: 12
+    4:
+      level-cost: 10
+      material-cost: 16
+  sweeping_edge:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 6
+      material-cost: 6
+    3:
+      level-cost: 8
+      material-cost: 8
+
+blue_ice:
+  frost_walker:
+    1:
+      level-cost: 6
+      material-cost: 8
+    2:
+      level-cost: 10
+      material-cost: 8
+
