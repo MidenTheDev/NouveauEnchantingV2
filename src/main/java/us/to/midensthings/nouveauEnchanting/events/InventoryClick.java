@@ -1,5 +1,8 @@
 package us.to.midensthings.nouveauEnchanting.events;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -11,12 +14,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import us.to.midensthings.nouveauEnchanting.NouveauEnchanting;
 import us.to.midensthings.nouveauEnchanting.compat.ItemsAdderCompat;
+import us.to.midensthings.nouveauEnchanting.enchanting.EnchHandler;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantingGUI;
 
 public class InventoryClick implements Listener {
 
-    private final int toolSlot = EnchantingGUI.toolSlot;
-    private final int materialSlot = EnchantingGUI.materialSlot;
     private final int resultSlot = EnchantingGUI.resultSlot;
 
 
@@ -36,11 +38,13 @@ public class InventoryClick implements Listener {
         EnchantingGUI eGUI = (EnchantingGUI) inv.getHolder();
         // Check if the Tool Slot was clicked
 
+        final int materialSlot = EnchantingGUI.materialSlot;
+        final int toolSlot = EnchantingGUI.toolSlot;
         switch (event.getRawSlot()) {
             case toolSlot:
 
                 // If player swaps items in tool slot or removes item in slot, clear result (Dupe prevention)
-                if (event.getCurrentItem() != null) {clearResult(inv); return;}
+                if (event.getCurrentItem() != null) {clearResult(inv); eGUI.initializeItems(); return;}
 
                 if (event.getCurrentItem() == null && inv.getItem(materialSlot) != null) {
 
@@ -56,7 +60,7 @@ public class InventoryClick implements Listener {
             case materialSlot:
 
                 // If player swaps items in tool slot or removes item in slot, clear result (Dupe prevention)
-                if (event.getCurrentItem() != null) {clearResult(inv); return;}
+                if (event.getCurrentItem() != null) {clearResult(inv); eGUI.initializeItems(); return;}
 
                 if (event.getCurrentItem() == null && inv.getItem(toolSlot) != null) {
 
@@ -74,6 +78,7 @@ public class InventoryClick implements Listener {
                 if (inv.getItem(toolSlot) == null || inv.getItem(materialSlot) == null) {
                     event.setCancelled(true);
                     clearResult(inv);
+                    eGUI.initializeItems();
                 }
 
                 if (event.getCurrentItem() != null) {
@@ -99,14 +104,16 @@ public class InventoryClick implements Listener {
                     int levelRequirement = plugin.materialsConf.getInt(materialName+"."+enchName+"."+resultEnchantLevel+".level-cost");
                     Player player = (Player) event.getWhoClicked();
 
+                    // You have not enough minerals
                     if (matCount < matRequirement) {
-                        // TODO: Send player message, not enough materials
+                        player.sendMessage(Component.text("You do not have enough materials!").color(TextColor.color(Color.RED.asRGB())));
                         event.setCancelled(true);
                         return;
                     }
 
+                    // Not enough levels
                     if (player.getLevel() < levelRequirement) {
-                        // TODO: Send player message, not enough levels
+                        player.sendMessage(Component.text("You do not have enough levels!").color(TextColor.color(Color.RED.asRGB())));
                         event.setCancelled(true);
                         return;
                     }
@@ -115,6 +122,7 @@ public class InventoryClick implements Listener {
                     inv.setItem(toolSlot, ItemStack.empty());
                     inv.getItem(materialSlot).subtract(matRequirement);
                     player.setLevel(player.getLevel()-levelRequirement);
+                    eGUI.initializeItems();
                 }
 
 
@@ -150,13 +158,19 @@ public class InventoryClick implements Listener {
         if (toolItem.getType() == Material.AIR) {
 
             clearResult(inv);
+            eGUI.initializeItems();
             return;
         }
         // else, run enchant logic
+        EnchHandler eHandler = eGUI.getEnchHandler();
+        if (eHandler.isValidRecipe(toolItem, materialItem)) {
 
-        if (eGUI.getEnchHandler().isValidRecipe(toolItem, materialItem)) {
+            inv.setItem(resultSlot,eHandler.getAppliedItem(toolItem, materialItem));
 
-            inv.setItem(resultSlot,eGUI.getEnchHandler().getAppliedItem(toolItem, materialItem));
+            // Update cost preview
+            int matCost = eHandler.getCurrentEnchantMaterialCost();
+            int levelCost = eHandler.getCurrentEnchantLevelCost();
+            eGUI.updateCostText(matCost,levelCost);
         }
     }
 }

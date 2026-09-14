@@ -11,6 +11,8 @@ import us.to.midensthings.nouveauEnchanting.compat.ItemsAdderCompat;
 
 public class EnchHandler {
     private Enchantment currentEnchant;
+    private int currentEnchantLevelCost;
+    private int currentEnchantMaterialCost;
 
     private final NouveauEnchanting plugin = NouveauEnchanting.getPlugin(NouveauEnchanting.class);
 
@@ -62,6 +64,9 @@ public class EnchHandler {
                 }
 
                 // Valid enchantment for material applied to given tool found.
+                int enchantLevel = tool.getEnchantmentLevel(enchantment)+1;
+                currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName()+"."+enchantKey+"."+enchantLevel+".material-cost");
+                currentEnchantLevelCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName()+"."+enchantKey+"."+enchantLevel+".level-cost");
                 currentEnchant = enchantment;
                 return true;
             }
@@ -109,7 +114,11 @@ public class EnchHandler {
                     RegistryKey.ENCHANTMENT.typedKey(Key.key("minecraft:" + enchantKey)));
             if (enchantment.canEnchantItem(tool)) {
                 currentEnchant = enchantment;
-                result.addEnchantment(enchantment, result.getEnchantmentLevel(enchantment) + 1);
+                int enchantLevel = tool.getEnchantmentLevel(enchantment)+1;
+                currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName()+"."+enchantKey+"."+enchantLevel+".material-cost");
+                currentEnchantLevelCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName()+"."+enchantKey+"."+enchantLevel+".level-cost");
+                currentEnchant = enchantment;
+                result.addEnchantment(enchantment, enchantLevel);
             }
 
         }
@@ -134,4 +143,11 @@ public class EnchHandler {
         return enchMaterial;
     }
 
+    public int getCurrentEnchantLevelCost() {
+        return currentEnchantLevelCost;
+    }
+
+    public int getCurrentEnchantMaterialCost() {
+        return currentEnchantMaterialCost;
+    }
 }

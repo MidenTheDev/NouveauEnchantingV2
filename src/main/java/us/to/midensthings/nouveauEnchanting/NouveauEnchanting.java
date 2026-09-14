@@ -12,8 +12,6 @@ import us.to.midensthings.nouveauEnchanting.events.InventoryClick;
 import us.to.midensthings.nouveauEnchanting.events.InventoryClose;
 import us.to.midensthings.nouveauEnchanting.events.OpenEnchantingTable;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
