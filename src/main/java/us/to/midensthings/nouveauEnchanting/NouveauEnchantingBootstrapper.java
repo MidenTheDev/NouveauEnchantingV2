@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NouveauEnchantingBootstrapper implements PluginBootstrap {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(NouveauEnchantingBootstrapper.class);
     MaterialRegistry materialRegistry;
     YamlConfiguration materialsConf;
     YamlConfiguration enchantsConf;
