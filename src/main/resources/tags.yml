@@ -94,3 +94,41 @@ armor:
 
   - turtle_helmet
 
+boots:
+  - leather_boots
+  - copper_boots
+  - golden_boots
+  - chainmail_boots
+  - diamond_boots
+  - iron_boots
+  - netherite_boots
+
+leggings:
+  - leather_leggings
+  - copper_leggings
+  - golden_leggings
+  - chainmail_leggings
+  - diamond_leggings
+  - iron_leggings
+  - netherite_leggings
+
+chestplates:
+  - leather_chestplate
+  - copper_chestplate
+  - golden_chestplate
+  - chainmail_chestplate
+  - diamond_chestplate
+  - iron_chestplate
+  - netherite_chestplate
+
+helmets:
+  - leather_helmet
+  - copper_helmet
+  - golden_helmet
+  - chainmail_helmet
+  - diamond_helmet
+  - iron_helmet
+  - netherite_helmet
+  - turtle_helmet
+
+
