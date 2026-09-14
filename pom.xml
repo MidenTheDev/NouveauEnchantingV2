@@ -64,5 +64,12 @@
             <version>[26.1.2.build,)</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>beer.devs</groupId>
+            <artifactId>itemsadder-api</artifactId>
+            <!-- Replace {version} with the latest version -->
+            <version>4.0.18-beta-10</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

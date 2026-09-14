@@ -12,14 +12,26 @@ import java.util.List;
 
 public class EnchantMaterial {
     private Material vanillaMaterial;
+    private String materialName;
     private List<String> enchantmentKeys;
+    boolean isCustomMaterial;
+    String customMaterialSource;
 
 
     public EnchantMaterial(Material material, List<String> keys) {
         vanillaMaterial = material;
         enchantmentKeys = keys;
+        materialName = material.name();
 
 
+    }
+
+    public EnchantMaterial(String name, List<String> keys, boolean isCustomMaterial, String customMaterialSource) {
+        vanillaMaterial = null;
+        enchantmentKeys = keys;
+        materialName = name;
+        this.isCustomMaterial = isCustomMaterial;
+        this.customMaterialSource = customMaterialSource;
     }
 
 
@@ -31,4 +43,15 @@ public class EnchantMaterial {
         return enchantmentKeys;
     }
 
+    public boolean isCustomMaterial() {
+        return isCustomMaterial;
+    }
+
+    public String getCustomMaterialSource() {
+        return customMaterialSource;
+    }
+
+    public String getMaterialName() {
+        return materialName;
+    }
 }

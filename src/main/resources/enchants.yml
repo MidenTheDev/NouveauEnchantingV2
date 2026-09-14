@@ -23,3 +23,8 @@ looting:
     - "mace"
     - "bow"
     - "crossbow"
+
+protection:
+  max-level: 4
+  allowed-items:
+    - "#armor"

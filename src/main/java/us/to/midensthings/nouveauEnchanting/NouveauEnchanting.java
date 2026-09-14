@@ -14,6 +14,8 @@ import us.to.midensthings.nouveauEnchanting.events.OpenEnchantingTable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 public final class NouveauEnchanting extends JavaPlugin {
@@ -21,17 +23,22 @@ public final class NouveauEnchanting extends JavaPlugin {
     FileConfiguration config;
     PluginManager pm;
 
-    File materialsYml = new File(this.getDataFolder()+"/materials.yml");
     public YamlConfiguration materialsConf;
+    public YamlConfiguration enchantsConf;
+    public YamlConfiguration tagsConf;
 
     Logger logger = this.getLogger();
     public MaterialRegistry materialRegistry;
 
+    public List<String> enabledCompats;
 
 
-    public NouveauEnchanting(MaterialRegistry bootstrapRegistry, YamlConfiguration bootMaterialsConf) {
+
+    public NouveauEnchanting(MaterialRegistry bootstrapRegistry, YamlConfiguration bootMaterialsConf, YamlConfiguration bootEnchantsConf, YamlConfiguration bootTagsConf) {
         materialRegistry = bootstrapRegistry;
         materialsConf = bootMaterialsConf;
+        enchantsConf = bootEnchantsConf;
+        tagsConf = bootTagsConf;
     }
 
 
@@ -73,7 +80,11 @@ public final class NouveauEnchanting extends JavaPlugin {
 
 
     public void loadCompats() {
-
+        enabledCompats = new ArrayList<>();
+        if (pm.getPlugin("ItemsAdder") != null) {
+            enabledCompats.add("ItemsAdder");
+            logger.info("ItemsAdder Compatibility Enabled");
+        }
     }
 
     public void loadConfigs() {

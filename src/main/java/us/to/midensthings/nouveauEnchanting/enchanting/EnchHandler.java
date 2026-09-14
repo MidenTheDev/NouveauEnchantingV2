@@ -7,6 +7,7 @@ import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import us.to.midensthings.nouveauEnchanting.NouveauEnchanting;
+import us.to.midensthings.nouveauEnchanting.compat.ItemsAdderCompat;
 
 public class EnchHandler {
     private Enchantment currentEnchant;
@@ -21,8 +22,9 @@ public class EnchHandler {
     Checks if the given tool and material have a valid enchanting result.
      */
     public boolean isValidRecipe(ItemStack tool, ItemStack material) {
-        EnchantMaterial enchMaterial = plugin.materialRegistry.getMaterial(material.getType().name());
-        plugin.getLogger().warning("Material Name: "+material.getType().name());
+        EnchantMaterial enchMaterial = getCompatibleEnchantMaterial(material);
+
+
         if (enchMaterial == null) {
 
             // Not a valid material for enchanting at all
@@ -89,7 +91,7 @@ public class EnchHandler {
         ItemStack result = tool.clone();
 
 
-        EnchantMaterial enchMaterial = plugin.materialRegistry.getMaterial(material.getType().name());
+        EnchantMaterial enchMaterial = getCompatibleEnchantMaterial(material);
 
 
         /*
@@ -113,6 +115,23 @@ public class EnchHandler {
         }
 
         return result;
+    }
+
+    private EnchantMaterial getCompatibleEnchantMaterial(ItemStack material) {
+        EnchantMaterial enchMaterial;
+
+        // Check for compats and get the material according to compat or vanilla
+        if (plugin.enabledCompats.contains("ItemsAdder")) {
+            ItemsAdderCompat iaComp = new ItemsAdderCompat();
+            if (iaComp.isCustomItem(material)) {
+                enchMaterial = plugin.materialRegistry.getMaterial(iaComp.getItemID(material));
+            } else {
+                enchMaterial = plugin.materialRegistry.getMaterial(material.getType().name());
+            }
+        } else {
+            enchMaterial = plugin.materialRegistry.getMaterial(material.getType().name());
+        }
+        return enchMaterial;
     }
 
 }

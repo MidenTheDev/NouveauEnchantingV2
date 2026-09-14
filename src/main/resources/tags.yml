@@ -56,3 +56,41 @@ spears:
   - stone_spear
   - wooden_spear
 
+armor:
+  - leather_helmet
+  - leather_leggings
+  - leather_chestplate
+  - leather_boots
+
+  - golden_helmet
+  - golden_leggings
+  - golden_chestplate
+  - golden_boots
+
+  - iron_helmet
+  - iron_leggings
+  - iron_chestplate
+  - iron_boots
+
+  - copper_helmet
+  - copper_leggings
+  - copper_chestplate
+  - copper_boots
+
+  - chainmail_helmet
+  - chainmail_leggings
+  - chainmail_chestplate
+  - chainmail_boots
+
+  - diamond_helmet
+  - diamond_leggings
+  - diamond_chestplate
+  - diamond_boots
+
+  - netherite_helmet
+  - netherite_leggings
+  - netherite_chestplate
+  - netherite_boots
+
+  - turtle_helmet
+

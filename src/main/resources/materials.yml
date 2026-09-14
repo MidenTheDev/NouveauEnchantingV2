@@ -54,3 +54,21 @@ LAPIS_LAZULI:
     3:
       level-cost: 4
       material-cost: 4
+
+refined_amethyst:
+  custom-material:
+    source: "itemsadder"
+    namespace: "tbmcia"
+  protection:
+    1:
+      level-cost: 4
+      material-cost: 4
+    2:
+      level-cost: 4
+      material-cost: 4
+    3:
+      level-cost: 4
+      material-cost: 4
+    4:
+      level-cost: 4
+      material-cost: 4

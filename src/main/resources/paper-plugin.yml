@@ -4,6 +4,13 @@ main: us.to.midensthings.nouveauEnchanting.NouveauEnchanting
 api-version: '26.1.2'
 bootstrapper: us.to.midensthings.nouveauEnchanting.NouveauEnchantingBootstrapper
 
+dependencies:
+  server:
+    ItemsAdder:
+      load: BEFORE
+      required: false
+      join-classpath: true
+
 commands:
   nedebug:
     description: "Debug command for Nouveau Enchanting"

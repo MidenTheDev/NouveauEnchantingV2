@@ -76,10 +76,43 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
         materialsConf.getConfigurationSection("").getKeys(false).forEach(material -> {
             List<String> enchantKeys = new ArrayList<>();
             materialsConf.getConfigurationSection(material).getKeys(false).forEach(enchantKey -> {
-                enchantKeys.add(enchantKey);
+
+                // Check if it's the custom item info section
+                // If it ISN'T, it's an enchant, add it to the list.
+                if (!enchantKey.equals("custom-material")) {
+                    enchantKeys.add(enchantKey);
+                }
+
             });
-            EnchantMaterial enchantMaterial = new EnchantMaterial(Material.valueOf(material), enchantKeys);
-            materialRegistry.addMaterial(material, enchantMaterial);
+            EnchantMaterial enchantMaterial;
+            // Check if the material exists and if it doesn't, check the compat instead
+            try {
+                Material.valueOf(material);
+                // If it gets past this point, material exists. Register as vanilla EnchantMaterial
+                enchantMaterial = new EnchantMaterial(Material.valueOf(material), enchantKeys);
+                materialRegistry.addMaterial(material, enchantMaterial);
+            } catch (IllegalArgumentException e) {
+                // If it doesn't, there's no vanilla amterial. Check compats.
+                // First, check if there's a custom-material section.
+                if (materialsConf.getConfigurationSection(material+".custom-material") == null) {
+                    // No custom material section, warn in console
+                    logger.warn("No valid material or custom material found for material " + material);
+                } else {
+                    // Check the specified custom material source (currently only itemsadder support, maybe more in the future.
+                    String customMaterialSource = materialsConf.getString(material+".custom-material.source");
+                    if (customMaterialSource.equalsIgnoreCase("itemsadder")) {
+                        // Get the namespace and material name to make retrieving the item via the API easier later
+                        String namespace = materialsConf.getString(material+".custom-material.namespace");
+                        enchantMaterial = new EnchantMaterial(namespace+":"+material,enchantKeys,true,customMaterialSource);
+                        materialRegistry.addMaterial(material, enchantMaterial);
+                    } else {
+                        // no support for whatever plugin is specified.
+                        logger.warn("No compatibility module found for custom material source plugin " + customMaterialSource);
+                    }
+                }
+            }
+
+
         });
 
 
@@ -113,7 +146,7 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
 
     @Override
     public JavaPlugin createPlugin(PluginProviderContext context) {
-        return new NouveauEnchanting(materialRegistry,materialsConf);
+        return new NouveauEnchanting(materialRegistry,materialsConf,enchantsConf,tagsConf);
         //return new NouveauEnchanting();
     }
 

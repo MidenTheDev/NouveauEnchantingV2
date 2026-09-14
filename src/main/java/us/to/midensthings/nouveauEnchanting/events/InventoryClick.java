@@ -10,6 +10,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import us.to.midensthings.nouveauEnchanting.NouveauEnchanting;
+import us.to.midensthings.nouveauEnchanting.compat.ItemsAdderCompat;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantingGUI;
 
 public class InventoryClick implements Listener {
@@ -82,9 +83,20 @@ public class InventoryClick implements Listener {
                     // remove "minecraft:" namespace from ench name
                     String enchName = currentEnchant.getKey().asString().substring(10);
                     int resultEnchantLevel = event.getCurrentItem().getEnchantmentLevel(currentEnchant);
+                    String materialName;
+                    if (plugin.enabledCompats.contains("ItemsAdder")) {
+                        ItemsAdderCompat iaComp = new ItemsAdderCompat();
+                        if (iaComp.isCustomItem(materialItem)) {
+                            materialName = iaComp.getItemID(materialItem);
+                        } else {
+                            materialName = materialItem.getType().name();
+                        }
+                    } else {
+                        materialName = materialItem.getType().name();
+                    }
 
-                    int matRequirement = plugin.materialsConf.getInt(materialItem.getType()+"."+enchName+"."+resultEnchantLevel+".material-cost");
-                    int levelRequirement = plugin.materialsConf.getInt(materialItem.getType()+"."+enchName+"."+resultEnchantLevel+".level-cost");
+                    int matRequirement = plugin.materialsConf.getInt(materialName+"."+enchName+"."+resultEnchantLevel+".material-cost");
+                    int levelRequirement = plugin.materialsConf.getInt(materialName+"."+enchName+"."+resultEnchantLevel+".level-cost");
                     Player player = (Player) event.getWhoClicked();
 
                     if (matCount < matRequirement) {
