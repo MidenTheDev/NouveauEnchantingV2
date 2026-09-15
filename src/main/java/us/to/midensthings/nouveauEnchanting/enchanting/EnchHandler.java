@@ -66,7 +66,14 @@ public class EnchHandler {
                 // Valid enchantment for material applied to given tool found.
                 int enchantLevel = tool.getEnchantmentLevel(enchantment)+1;
                 currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName()+"."+enchantKey+"."+enchantLevel+".material-cost");
+                if (currentEnchantMaterialCost == 0) {
+                    currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase()+"."+enchantKey+"."+enchantLevel+".material-cost");
+                }
                 currentEnchantLevelCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName()+"."+enchantKey+"."+enchantLevel+".level-cost");
+                if (currentEnchantLevelCost == 0) {
+                    currentEnchantLevelCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase()+"."+enchantKey+"."+enchantLevel+".level-cost");
+                }
+
                 currentEnchant = enchantment;
                 return true;
             }
@@ -116,7 +123,13 @@ public class EnchHandler {
                 currentEnchant = enchantment;
                 int enchantLevel = tool.getEnchantmentLevel(enchantment)+1;
                 currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName()+"."+enchantKey+"."+enchantLevel+".material-cost");
+                if (currentEnchantMaterialCost == 0) {
+                    currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase()+"."+enchantKey+"."+enchantLevel+".material-cost");
+                }
                 currentEnchantLevelCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName()+"."+enchantKey+"."+enchantLevel+".level-cost");
+                if (currentEnchantLevelCost == 0) {
+                    currentEnchantLevelCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase()+"."+enchantKey+"."+enchantLevel+".level-cost");
+                }
                 currentEnchant = enchantment;
                 result.addEnchantment(enchantment, enchantLevel);
             }

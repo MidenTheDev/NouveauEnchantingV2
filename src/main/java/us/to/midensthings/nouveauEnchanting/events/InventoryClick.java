@@ -8,6 +8,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
@@ -101,7 +102,13 @@ public class InventoryClick implements Listener {
                     }
 
                     int matRequirement = plugin.materialsConf.getInt(materialName+"."+enchName+"."+resultEnchantLevel+".material-cost");
+                    if (matRequirement == 0) {
+                        matRequirement = plugin.materialsConf.getInt(materialName.toLowerCase()+"."+enchName+"."+resultEnchantLevel+".material-cost");
+                    }
                     int levelRequirement = plugin.materialsConf.getInt(materialName+"."+enchName+"."+resultEnchantLevel+".level-cost");
+                    if (levelRequirement == 0) {
+                        levelRequirement = plugin.materialsConf.getInt(materialName.toLowerCase()+"."+enchName+"."+resultEnchantLevel+".level-cost");
+                    }
                     Player player = (Player) event.getWhoClicked();
 
                     // You have not enough minerals
@@ -129,10 +136,13 @@ public class InventoryClick implements Listener {
                 break;
 
             default:
+
                 if (event.getRawSlot()<27) {
                     event.setCancelled(true);
                 }
-
+                if (event.getClick() == ClickType.SHIFT_LEFT) {
+                    event.setCancelled(true);
+                }
 
 
         }

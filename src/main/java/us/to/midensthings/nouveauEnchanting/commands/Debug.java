@@ -19,16 +19,20 @@ public class Debug {
             .then(Commands.literal("matreg").executes(ctx -> {
                 CommandSender sender = ctx.getSource().getSender();
                 plugin.materialRegistry.getMaterialRegistry().forEach((name, enchantMaterial) -> {
-                    doubleSenderConsoleMessage(sender,"name:"+ name + "\n material:" + enchantMaterial.getVanillaMaterial().toString());
+                    if (enchantMaterial.isCustomMaterial()) {
+                        doubleSenderConsoleMessage(sender,"name: "+ name + "\n material: " + enchantMaterial.getMaterialName());
+
+                    } else {
+                        doubleSenderConsoleMessage(sender,"name: "+ name + "\n material: " + enchantMaterial.getVanillaMaterial().toString());
+
+                    }
                     List<String> enchantKeys = enchantMaterial.getEnchantmentKeys();
-                    doubleSenderConsoleMessage(sender, "keys");
+                    doubleSenderConsoleMessage(sender, "Enchant keys:");
                     enchantKeys.forEach(key -> {
-                        doubleSenderConsoleMessage(sender, "Enchant keys:");
                         doubleSenderConsoleMessage(sender,key);
                     });
                 });
 
-                sender.sendMessage("Debug msg");
 
                 return Command.SINGLE_SUCCESS;
             }))
