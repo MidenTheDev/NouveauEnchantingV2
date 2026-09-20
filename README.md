@@ -55,4 +55,4 @@ None of the above features are currently implemented in the plugin, but are plan
 **A:** This plugin makes extensive use of Paper's api, even using features that are still considered experiemental and not officially supported. To make a plugin that achieves the same result using Spigot, while possible, would be a massive undertaking and would be a lot laggier than this plugin is currently on Paper.
 
 #### Q: Why does the Github repo say V2?
-**A:** This plugin is actually the 2nd iteration of the plugin that I've made. The original V1 version was made with the Spigot API (rather than Paper) and had half the feautres with twice the lag. V1 never saw the release since I was never fully satisfied with my work or the overall quality of my code.
+**A:** This plugin is actually the 2nd iteration of the plugin that I've made. The original V1 version was made with the Spigot API (rather than Paper) and had half the feautres with twice the lag. V1 never saw release since I was never fully satisfied with my work or the overall quality of my code.
