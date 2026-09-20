@@ -49,7 +49,7 @@ None of the above features are currently implemented in the plugin, but are plan
 ## :question: FAQ:
 
 #### Q:  I Need Help! X Isn't working!
-**A: **Check the relevant Wiki page. If the Wiki isn't helpful or you otherwise don't understand, join the Discord Server and ask for support there. (Wiki and Discord W.I.P)
+**A: **Check the relevant Wiki page. If the Wiki isn't helpful or you otherwise don't understand, join the Discord Server and ask for support there. (Discord W.I.P)
 
 #### Q: Why does this plugin only support Paper and not Spigot?
 **A:** This plugin makes extensive use of Paper's api, even using features that are still considered experiemental and not officially supported. To make a plugin that achieves the same result using Spigot, while possible, would be a massive undertaking and would be a lot laggier than this plugin is currently on Paper.
