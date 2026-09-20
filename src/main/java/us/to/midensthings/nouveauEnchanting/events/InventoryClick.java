@@ -177,9 +177,7 @@ public class InventoryClick implements Listener {
             inv.setItem(resultSlot,eHandler.getAppliedItem(toolItem, materialItem));
 
             // Update cost preview
-            int matCost = eHandler.getCurrentEnchantMaterialCost();
-            int levelCost = eHandler.getCurrentEnchantLevelCost();
-            eGUI.updateCostText(matCost,levelCost);
+            eGUI.updateCostText();
         }
     }
 }

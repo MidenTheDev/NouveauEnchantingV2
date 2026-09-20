@@ -22,6 +22,8 @@ public class EnchantMaterial {
         vanillaMaterial = material;
         enchantmentKeys = keys;
         materialName = material.name();
+        isCustomMaterial = false;
+        customMaterialSource = null;
 
 
     }

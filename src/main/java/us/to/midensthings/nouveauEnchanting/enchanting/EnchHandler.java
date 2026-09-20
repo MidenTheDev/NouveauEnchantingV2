@@ -3,6 +3,7 @@ package us.to.midensthings.nouveauEnchanting.enchanting;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.key.Key;
+import org.bukkit.Bukkit;
 import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -67,11 +68,29 @@ public class EnchHandler {
                 int enchantLevel = tool.getEnchantmentLevel(enchantment)+1;
                 currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName()+"."+enchantKey+"."+enchantLevel+".material-cost");
                 if (currentEnchantMaterialCost == 0) {
-                    currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase()+"."+enchantKey+"."+enchantLevel+".material-cost");
+                    if (enchMaterial.isCustomMaterial) {
+                        if (enchMaterial.getCustomMaterialSource().equalsIgnoreCase("ItemsAdder")) {
+                            String unNamespacedID = enchMaterial.getMaterialName();
+                            unNamespacedID = unNamespacedID.substring(unNamespacedID.indexOf(":")+1);
+                            currentEnchantMaterialCost = plugin.materialsConf.getInt(unNamespacedID + "." + enchantKey + "." + enchantLevel + ".material-cost");
+                        }
+                    } else {
+                        currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase() + "." + enchantKey + "." + enchantLevel + ".material-cost");
+                    }
                 }
+
                 currentEnchantLevelCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName()+"."+enchantKey+"."+enchantLevel+".level-cost");
                 if (currentEnchantLevelCost == 0) {
-                    currentEnchantLevelCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase()+"."+enchantKey+"."+enchantLevel+".level-cost");
+                    if (enchMaterial.isCustomMaterial) {
+                        if (enchMaterial.getCustomMaterialSource().equalsIgnoreCase("ItemsAdder")) {
+                            String unNamespacedID = enchMaterial.getMaterialName();
+                            unNamespacedID = unNamespacedID.substring(unNamespacedID.indexOf(":")+1);
+                            currentEnchantLevelCost = plugin.materialsConf.getInt(unNamespacedID + "." + enchantKey + "." + enchantLevel + ".level-cost");
+
+                        }
+                    } else {
+                        currentEnchantLevelCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase() + "." + enchantKey + "." + enchantLevel + ".level-cost");
+                    }
                 }
 
                 currentEnchant = enchantment;
@@ -124,11 +143,29 @@ public class EnchHandler {
                 int enchantLevel = tool.getEnchantmentLevel(enchantment)+1;
                 currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName()+"."+enchantKey+"."+enchantLevel+".material-cost");
                 if (currentEnchantMaterialCost == 0) {
-                    currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase()+"."+enchantKey+"."+enchantLevel+".material-cost");
+                    if (enchMaterial.isCustomMaterial) {
+                        if (enchMaterial.getCustomMaterialSource().equalsIgnoreCase("ItemsAdder")) {
+                            String unNamespacedID = enchMaterial.getMaterialName();
+                            unNamespacedID = unNamespacedID.substring(unNamespacedID.indexOf(":")+1);
+                            currentEnchantMaterialCost = plugin.materialsConf.getInt(unNamespacedID + "." + enchantKey + "." + enchantLevel + ".material-cost");
+                        }
+                    } else {
+                        currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase() + "." + enchantKey + "." + enchantLevel + ".material-cost");
+                    }
                 }
+
                 currentEnchantLevelCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName()+"."+enchantKey+"."+enchantLevel+".level-cost");
                 if (currentEnchantLevelCost == 0) {
-                    currentEnchantLevelCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase()+"."+enchantKey+"."+enchantLevel+".level-cost");
+                    if (enchMaterial.isCustomMaterial) {
+                        if (enchMaterial.getCustomMaterialSource().equalsIgnoreCase("ItemsAdder")) {
+                            String unNamespacedID = enchMaterial.getMaterialName();
+                            unNamespacedID = unNamespacedID.substring(unNamespacedID.indexOf(":")+1);
+                            currentEnchantLevelCost = plugin.materialsConf.getInt(unNamespacedID + "." + enchantKey + "." + enchantLevel + ".level-cost");
+
+                        }
+                    } else {
+                        currentEnchantLevelCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase() + "." + enchantKey + "." + enchantLevel + ".level-cost");
+                    }
                 }
                 currentEnchant = enchantment;
                 result.addEnchantment(enchantment, enchantLevel);
