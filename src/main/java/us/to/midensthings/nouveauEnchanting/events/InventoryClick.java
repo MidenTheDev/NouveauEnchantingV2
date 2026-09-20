@@ -1,5 +1,7 @@
 package us.to.midensthings.nouveauEnchanting.events;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Color;
@@ -130,6 +132,11 @@ public class InventoryClick implements Listener {
                     inv.setItem(toolSlot, ItemStack.empty());
                     inv.getItem(materialSlot).subtract(matRequirement);
                     player.setLevel(player.getLevel() - levelRequirement);
+
+                    if (plugin.getConfig().getBoolean("play-sound-on-enchant")) {
+                        player.playSound(Sound.sound(Key.key("block.enchantment_table.use"), Sound.Source.UI, 0.5F, 1F), Sound.Emitter.self());
+                    }
+
                     eGUI.initializeItems();
                 }
 

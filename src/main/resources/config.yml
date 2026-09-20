@@ -4,6 +4,9 @@ config-version: '1.0'
 override-enchanting-table: true
 # Replace the vanilla enchanting table with the custom enchanting gui.
 
+play-sound-on-enchant: true
+# Whether or not to play a sound effect when the player enchants an item
+
 gui-info:
   fill-inventory: true
   # Whether or not to fill the enchanting gui with glass panes
