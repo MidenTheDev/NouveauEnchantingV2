@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import us.to.midensthings.nouveauEnchanting.commands.Debug;
+import us.to.midensthings.nouveauEnchanting.commands.Enchanting;
 import us.to.midensthings.nouveauEnchanting.enchanting.MaterialRegistry;
 import us.to.midensthings.nouveauEnchanting.events.InventoryClick;
 import us.to.midensthings.nouveauEnchanting.events.InventoryClose;
@@ -70,6 +71,8 @@ public final class NouveauEnchanting extends JavaPlugin {
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             Debug debugCmd = new Debug();
             commands.registrar().register(debugCmd.debugRootBuilder);
+            Enchanting enchCmd = new Enchanting();
+            commands.registrar().register(enchCmd.coreCommandBuilder);
         });
 
     }
@@ -92,4 +95,5 @@ public final class NouveauEnchanting extends JavaPlugin {
 
 
     }
+
 }

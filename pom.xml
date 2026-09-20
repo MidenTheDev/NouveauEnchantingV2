@@ -6,7 +6,7 @@
 
     <groupId>us.to.midensthings</groupId>
     <artifactId>NouveauEnchanting</artifactId>
-    <version>1.0-SNAPSHOT-3</version>
+    <version>1.0-RC-1</version>
     <packaging>jar</packaging>
 
     <name>NouveauEnchanting</name>

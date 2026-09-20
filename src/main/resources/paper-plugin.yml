@@ -16,8 +16,24 @@ commands:
     description: "Debug command for Nouveau Enchanting"
     usage: "/nedebug"
     permission: nouveauenchanting.commands.debug
+  ne:
+    description: "Core for Nouveau Enchanting"
+    usage: "/ne"
+    permission: nouveauenchanting.commands.core
 
 permissions:
   nouveauenchanting.commands.debug:
     default: op
     description: "Allows use of debug commands."
+  nouveauenchanting.commands.reload:
+    default: op
+    description: "Allows use of /ne reload"
+  nouveauenchanting.commands.gui:
+    default: op
+    description: "Allows use of /ne opengui"
+  nouveauenchanting.commands.gui.other:
+    default: op
+    description: "Allows use of /ne opengui [player]"
+  nouveauenchanting.commands.core:
+    default: op
+    description: "Allows use of /ne"
