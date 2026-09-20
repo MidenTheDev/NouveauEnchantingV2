@@ -3,6 +3,7 @@ version: '${version}'
 main: us.to.midensthings.nouveauEnchanting.NouveauEnchanting
 api-version: '26.1.2'
 bootstrapper: us.to.midensthings.nouveauEnchanting.NouveauEnchantingBootstrapper
+folia-supported: true
 
 dependencies:
   server:
