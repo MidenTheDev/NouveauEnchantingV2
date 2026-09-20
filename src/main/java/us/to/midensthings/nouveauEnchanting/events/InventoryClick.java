@@ -41,27 +41,31 @@ public class InventoryClick implements Listener {
 
         final int materialSlot = EnchantingGUI.materialSlot;
         final int toolSlot = EnchantingGUI.toolSlot;
-        switch (event.getRawSlot()) {
-            case toolSlot:
+        if (event.getRawSlot() == toolSlot) {
+
+
+            // If player swaps items in tool slot or removes item in slot, clear result (Dupe prevention)
+            if (event.getCurrentItem() != null) {
+                clearResult(inv);
+                eGUI.initializeItems();
+                return;
+            }
+
+            if (event.getCurrentItem() == null && inv.getItem(materialSlot) != null) {
+
+                tryEnchant(event.getCursor(), inv.getItem(materialSlot), inv, eGUI);
+
+            }
+
+
+        } else if (event.getRawSlot() == materialSlot) {
 
                 // If player swaps items in tool slot or removes item in slot, clear result (Dupe prevention)
-                if (event.getCurrentItem() != null) {clearResult(inv); eGUI.initializeItems(); return;}
-
-                if (event.getCurrentItem() == null && inv.getItem(materialSlot) != null) {
-
-                    tryEnchant(event.getCursor(), inv.getItem(materialSlot), inv, eGUI);
-
+                if (event.getCurrentItem() != null) {
+                    clearResult(inv);
+                    eGUI.initializeItems();
+                    return;
                 }
-
-
-                break;
-
-
-
-            case materialSlot:
-
-                // If player swaps items in tool slot or removes item in slot, clear result (Dupe prevention)
-                if (event.getCurrentItem() != null) {clearResult(inv); eGUI.initializeItems(); return;}
 
                 if (event.getCurrentItem() == null && inv.getItem(toolSlot) != null) {
 
@@ -69,11 +73,7 @@ public class InventoryClick implements Listener {
 
                 }
 
-                break;
-
-
-
-            case resultSlot:
+        } else if (event.getRawSlot() == resultSlot) {
 
                 // Prevent dupes/free enchants by verifying there is a tool and material present when trying to remove enchanted item.
                 if (inv.getItem(toolSlot) == null || inv.getItem(materialSlot) == null) {
@@ -101,13 +101,13 @@ public class InventoryClick implements Listener {
                         materialName = materialItem.getType().name();
                     }
 
-                    int matRequirement = plugin.materialsConf.getInt(materialName+"."+enchName+"."+resultEnchantLevel+".material-cost");
+                    int matRequirement = plugin.materialsConf.getInt(materialName + "." + enchName + "." + resultEnchantLevel + ".material-cost");
                     if (matRequirement == 0) {
-                        matRequirement = plugin.materialsConf.getInt(materialName.toLowerCase()+"."+enchName+"."+resultEnchantLevel+".material-cost");
+                        matRequirement = plugin.materialsConf.getInt(materialName.toLowerCase() + "." + enchName + "." + resultEnchantLevel + ".material-cost");
                     }
-                    int levelRequirement = plugin.materialsConf.getInt(materialName+"."+enchName+"."+resultEnchantLevel+".level-cost");
+                    int levelRequirement = plugin.materialsConf.getInt(materialName + "." + enchName + "." + resultEnchantLevel + ".level-cost");
                     if (levelRequirement == 0) {
-                        levelRequirement = plugin.materialsConf.getInt(materialName.toLowerCase()+"."+enchName+"."+resultEnchantLevel+".level-cost");
+                        levelRequirement = plugin.materialsConf.getInt(materialName.toLowerCase() + "." + enchName + "." + resultEnchantLevel + ".level-cost");
                     }
                     Player player = (Player) event.getWhoClicked();
 
@@ -128,14 +128,12 @@ public class InventoryClick implements Listener {
                     // Take required materials and levels, do not cancel event (let player take item)
                     inv.setItem(toolSlot, ItemStack.empty());
                     inv.getItem(materialSlot).subtract(matRequirement);
-                    player.setLevel(player.getLevel()-levelRequirement);
+                    player.setLevel(player.getLevel() - levelRequirement);
                     eGUI.initializeItems();
                 }
 
 
-                break;
-
-            default:
+        } else {
 
                 if (event.getRawSlot()<27) {
                     event.setCancelled(true);

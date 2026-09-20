@@ -5,50 +5,84 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import us.to.midensthings.nouveauEnchanting.NouveauEnchanting;
+import us.to.midensthings.nouveauEnchanting.compat.ItemsAdderCompat;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class EnchantingGUI implements InventoryHolder {
-    public static final int toolSlot = 10;
-    public static final int materialSlot = 12;
-    public static final int resultSlot = 16;
-    public static final int costPreviewSlot = 14;
+    private final NouveauEnchanting plugin = NouveauEnchanting.getPlugin(NouveauEnchanting.class);
+    FileConfiguration config = plugin.getConfig();
+    public static int toolSlot;
+    public static int materialSlot;
+    public static int resultSlot;
+    public static int costPreviewSlot;
 
     private final EnchHandler enchHandler;
     private final Inventory inv;
-    private final NouveauEnchanting plugin = NouveauEnchanting.getPlugin(NouveauEnchanting.class);
+
 
     public EnchantingGUI() {
+
+        // get slot numbers from config in case people want to set their own guis
+        toolSlot = config.getInt("gui-info.tool-slot");
+        materialSlot = config.getInt("gui-info.material-slot");
+        resultSlot = config.getInt("gui-info.result-slot");
+        costPreviewSlot = config.getInt("gui-info.cost-preview-slot");
         // Create 3X9 chest gui with custom name for fontimage gui
-        inv = plugin.getServer().createInventory(this, 27, ":offset_-16::enchanting_window:");
+        inv = plugin.getServer().createInventory(this, 27, config.getString("gui-info.inventory-name", ":offset_-16::enchanting_window:"));
         enchHandler = new EnchHandler();
         // Add starting Items
         initializeItems();
     }
 
     public void initializeItems() {
-        inv.setItem(costPreviewSlot,createGuiItem(Material.PAPER,
+
+        inv.setItem(costPreviewSlot,createGuiItem(
                 Component.text("No material entered").color(TextColor.color(Color.FUCHSIA.asRGB())),
-                10001,
                 Component.text("No material entered").color(TextColor.color(Color.AQUA.asRGB()))));
+        if (config.getBoolean("gui-info.fill-inventory")) {
+            ItemStack pane = ItemStack.of(Material.BLACK_STAINED_GLASS_PANE);
+            for (int i = 0;i<27;i++) {
+                if (i == toolSlot || i == materialSlot || i == costPreviewSlot || i == resultSlot) {
+                    continue;
+                }
+                inv.setItem(i,pane);
+            }
+        }
 
     }
-    protected ItemStack createGuiItem(final Material material, final Component name, int customModelData, Component lore) {
-        final ItemStack item = new ItemStack(material, 1);
+    protected ItemStack createGuiItem(Component name, Component lore) {
+        ItemStack item;
+        if (config.getConfigurationSection("gui-info.cost-preview-item.custom-material") != null) {
+            if (config.getString("gui-info.cost-preview-item.custom-material.source").equalsIgnoreCase("ItemsAdder")) {
+                if (plugin.enabledCompats.contains("ItemsAdder")) {
+                    ItemsAdderCompat iacomp = new ItemsAdderCompat();
+                    item = iacomp.getItemStack(config.getString("gui-info.cost-preview-item.custom-material.namespace")+":"+config.getString("gui-info.cost-preview-item.material"));
+                } else {
+                    // error in config somewhere, default to book
+                    item = ItemStack.of(Material.ENCHANTED_BOOK);
+                }
+            } else {
+                // error in config somewhere, default to book
+                item = ItemStack.of(Material.ENCHANTED_BOOK);
+            }
+        } else {
+            // Not custom item, load vanilla material from config.
+            item = ItemStack.of(Material.valueOf(config.getString("gui-info.cost-preview-item.material")));
+        }
+
         final ItemMeta meta = item.getItemMeta();
 
         // Set the name of the item
         meta.customName(name);
-
-        // Set the custom model data
-        meta.setCustomModelData(customModelData);
 
         // Add the lore line
         List<Component> newLore = new ArrayList<>();

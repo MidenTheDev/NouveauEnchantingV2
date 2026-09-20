@@ -1,131 +1,69 @@
-refined_amethyst:
-  custom-material:
-    source: "itemsadder"
-    namespace: "myItems"
+QUARTZ:
   sharpness:
     1:
       level-cost: 4
-      material-cost: 4
+      material-cost: 8
     2:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 6
+      material-cost: 8
     3:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 6
+      material-cost: 12
     4:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 8
+      material-cost: 12
     5:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 8
+      material-cost: 20
   power:
     1:
       level-cost: 4
-      material-cost: 4
-    2:
-      level-cost: 4
-      material-cost: 4
-    3:
-      level-cost: 4
-      material-cost: 4
-    4:
-      level-cost: 4
-      material-cost: 4
-    5:
-      level-cost: 4
-      material-cost: 4
-
-
-HEART_OF_THE_SEA:
-  impaling:
-    1:
-      level-cost: 4
-      material-cost: 1
+      material-cost: 8
     2:
       level-cost: 6
-      material-cost: 1
+      material-cost: 8
     3:
-      level-cost: 8
-      material-cost: 1
-    4:
-      level-cost: 10
-      material-cost: 1
-    5:
-      level-cost: 12
-      material-cost: 1
-  luck_of_the_sea:
-    1:
-      level-cost: 4
-      material-cost: 1
-    2:
       level-cost: 6
-      material-cost: 1
-    3:
+      material-cost: 12
+    4:
       level-cost: 8
-      material-cost: 1
-  aqua_affinity:
-    1:
+      material-cost: 12
+    5:
       level-cost: 8
-      material-cost: 1
+      material-cost: 20
 
-ruby:
-  custom-material:
-    source: "itemsadder"
-    namespace: "myItems"
+BLAZE_POWDER:
   smite:
     1:
       level-cost: 4
-      material-cost: 4
+      material-cost: 8
     2:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 6
+      material-cost: 8
     3:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 6
+      material-cost: 12
     4:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 8
+      material-cost: 12
     5:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 8
+      material-cost: 20
   fire_protection:
     1:
       level-cost: 4
-      material-cost: 4
+      material-cost: 8
     2:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 6
+      material-cost: 8
     3:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 6
+      material-cost: 12
     4:
-      level-cost: 4
-      material-cost: 4
-sapphire:
-  custom-material:
-    source: "itemsadder"
-    namespace: "myItems"
-  efficiency:
-    1:
-      level-cost: 4
-      material-cost: 4
-    2:
-      level-cost: 4
-      material-cost: 4
-    3:
-      level-cost: 4
-      material-cost: 4
-    4:
-      level-cost: 4
-      material-cost: 4
-    5:
-      level-cost: 4
-      material-cost: 4
+      level-cost: 8
+      material-cost: 12
 
-moonstone:
-  custom-material:
-    source: "itemsadder"
-    namespace: "myItems"
+COPPER_BLOCK:
   lunge:
     1:
       level-cost: 4
@@ -147,23 +85,52 @@ moonstone:
       level-cost: 12
       material-cost: 6
 
-adamantium_ingot:
-  custom-material:
-    source: "itemsadder"
-    namespace: "myItems"
+HONEYCOMB:
   protection:
     1:
       level-cost: 4
-      material-cost: 4
+      material-cost: 6
     2:
       level-cost: 8
-      material-cost: 5
+      material-cost: 9
     3:
       level-cost: 12
-      material-cost: 6
+      material-cost: 14
     4:
       level-cost: 16
-      material-cost: 8
+      material-cost: 18
+
+HEART_OF_THE_SEA:
+  impaling:
+    1:
+      level-cost: 4
+      material-cost: 1
+    2:
+      level-cost: 4
+      material-cost: 1
+    3:
+      level-cost: 6
+      material-cost: 1
+    4:
+      level-cost: 8
+      material-cost: 1
+    5:
+      level-cost: 12
+      material-cost: 1
+  luck_of_the_sea:
+    1:
+      level-cost: 4
+      material-cost: 1
+    2:
+      level-cost: 6
+      material-cost: 1
+    3:
+      level-cost: 8
+      material-cost: 1
+  aqua_affinity:
+    1:
+      level-cost: 8
+      material-cost: 1
 
 BREEZE_ROD:
   wind_burst:
@@ -404,6 +371,22 @@ amethyst_shard:
     4:
       level-cost: 10
       material-cost: 20
+  efficiency:
+    1:
+      level-cost: 4
+      material-cost: 8
+    2:
+      level-cost: 6
+      material-cost: 12
+    3:
+      level-cost: 6
+      material-cost: 16
+    4:
+      level-cost: 8
+      material-cost: 16
+    5:
+      level-cost: 8
+      material-cost: 24
 
 slime_ball:
   punch:

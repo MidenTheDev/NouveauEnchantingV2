@@ -1,5 +1,30 @@
 config-version: '1.0'
-#do not change this unless you really know what you're doing!
+# Do not change this unless you really know what you're doing!
 
 override-enchanting-table: true
-#replace the vanilla enchanting table with the custom enchanting gui.
+# Replace the vanilla enchanting table with the custom enchanting gui.
+
+gui-info:
+  fill-inventory: true
+  # Whether or not to fill the enchanting gui with glass panes
+  inventory-name: 'Enchanting Table'
+  # Can use FontImages for custom GUI
+  tool-slot: 10
+  # Inventory slot for the tool being enchanted
+  material-slot: 12
+  # Inventory slot for the material you're enchanting with
+  cost-preview-slot: 14
+  # Inventory slot for the arrow icon that shows the cost
+  result-slot: 16
+  # Inventory slot that the resulting enchanted item shows up on
+  cost-preview-item:
+    material: ENCHANTED_BOOK
+#    material: icon_right_blue
+#    custom-material:
+#      source: "itemsadder"
+#      namespace: "_iainternal"
+
+
+
+
+

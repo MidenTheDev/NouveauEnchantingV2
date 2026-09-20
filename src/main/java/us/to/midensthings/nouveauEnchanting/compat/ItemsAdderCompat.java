@@ -1,6 +1,7 @@
 package us.to.midensthings.nouveauEnchanting.compat;
 
 import dev.lone.itemsadder.api.CustomStack;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantMaterial;
 
@@ -16,16 +17,19 @@ public class ItemsAdderCompat {
         return true;
     }
 
+
     public String getItemID(ItemStack material) {
         CustomStack customStack = CustomStack.byItemStack(material);
         return customStack.getId();
     }
 
-    public boolean isValidRecipeCustom() {
-
-
-
-        return true;
+    public ItemStack getItemStack(String namespacedItemID) {
+        CustomStack customStack = CustomStack.getInstance(namespacedItemID);
+        if (customStack != null) {
+            return customStack.getItemStack();
+        }
+        // default to enchanted book if item not found
+        return ItemStack.of(Material.ENCHANTED_BOOK);
     }
 
 

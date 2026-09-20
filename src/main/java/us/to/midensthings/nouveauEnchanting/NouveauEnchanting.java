@@ -50,10 +50,6 @@ public final class NouveauEnchanting extends JavaPlugin {
         registerEvents();
         registerCommands();
 
-
-
-
-
     }
     @Override
     public void onDisable() {
@@ -85,6 +81,7 @@ public final class NouveauEnchanting extends JavaPlugin {
             enabledCompats.add("ItemsAdder");
             logger.info("ItemsAdder Compatibility Enabled");
         }
+
     }
 
     public void loadConfigs() {
