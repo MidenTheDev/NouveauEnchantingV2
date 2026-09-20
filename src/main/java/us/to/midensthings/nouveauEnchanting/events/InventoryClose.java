@@ -15,13 +15,14 @@ public class InventoryClose implements Listener {
         if (event.getInventory().getHolder() instanceof EnchantingGUI) {
             World world = event.getPlayer().getWorld();
             Inventory inv = event.getInventory();
-            if (inv.getItem(EnchantingGUI.toolSlot) != null) {
+            EnchantingGUI eGUI = (EnchantingGUI) inv.getHolder();
+            if (inv.getItem(eGUI.getToolSlot()) != null) {
 
-                world.dropItem(event.getPlayer().getLocation(), inv.getItem(EnchantingGUI.toolSlot));
+                world.dropItem(event.getPlayer().getLocation(), inv.getItem(eGUI.getToolSlot()));
             }
-            if (inv.getItem(EnchantingGUI.materialSlot) != null) {
+            if (inv.getItem(eGUI.getMaterialSlot()) != null) {
 
-                world.dropItem(event.getPlayer().getLocation(), inv.getItem(EnchantingGUI.materialSlot));
+                world.dropItem(event.getPlayer().getLocation(), inv.getItem(eGUI.getMaterialSlot()));
             }
 
         }

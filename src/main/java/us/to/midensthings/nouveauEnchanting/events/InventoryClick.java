@@ -20,7 +20,7 @@ import us.to.midensthings.nouveauEnchanting.enchanting.EnchantingGUI;
 
 public class InventoryClick implements Listener {
 
-    private final int resultSlot = EnchantingGUI.resultSlot;
+    private int resultSlot;
 
 
 
@@ -39,8 +39,9 @@ public class InventoryClick implements Listener {
         EnchantingGUI eGUI = (EnchantingGUI) inv.getHolder();
         // Check if the Tool Slot was clicked
 
-        final int materialSlot = EnchantingGUI.materialSlot;
-        final int toolSlot = EnchantingGUI.toolSlot;
+        final int materialSlot = eGUI.getMaterialSlot();
+        final int toolSlot = eGUI.getToolSlot();
+        resultSlot  = eGUI.getResultSlot();
         if (event.getRawSlot() == toolSlot) {
 
 

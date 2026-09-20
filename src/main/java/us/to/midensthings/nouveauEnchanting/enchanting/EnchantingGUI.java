@@ -20,10 +20,10 @@ import java.util.List;
 public class EnchantingGUI implements InventoryHolder {
     private final NouveauEnchanting plugin = NouveauEnchanting.getPlugin(NouveauEnchanting.class);
     FileConfiguration config = plugin.getConfig();
-    public static int toolSlot;
-    public static int materialSlot;
-    public static int resultSlot;
-    public static int costPreviewSlot;
+    private int toolSlot;
+    private int materialSlot;
+    private int resultSlot;
+    private int costPreviewSlot;
 
     private final EnchHandler enchHandler;
     private final Inventory inv;
@@ -116,5 +116,21 @@ public class EnchantingGUI implements InventoryHolder {
         inv.getItem(costPreviewSlot).setItemMeta(costPreviewMeta);
 
 
+    }
+
+    public int getToolSlot() {
+        return toolSlot;
+    }
+
+    public int getMaterialSlot() {
+        return materialSlot;
+    }
+
+    public int getResultSlot() {
+        return resultSlot;
+    }
+
+    public int getCostPreviewSlot() {
+        return costPreviewSlot;
     }
 }
