@@ -4,6 +4,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -17,7 +18,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import us.to.midensthings.nouveauEnchanting.NouveauEnchanting;
 import us.to.midensthings.nouveauEnchanting.compat.ItemsAdderCompat;
+import us.to.midensthings.nouveauEnchanting.customevents.PlayerEnchantEvent;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchHandler;
+import us.to.midensthings.nouveauEnchanting.enchanting.EnchantMaterial;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantingGUI;
 
 public class InventoryClick implements Listener {
@@ -132,6 +135,19 @@ public class InventoryClick implements Listener {
                     inv.setItem(toolSlot, ItemStack.empty());
                     inv.getItem(materialSlot).subtract(matRequirement);
                     player.setLevel(player.getLevel() - levelRequirement);
+
+                    String customMaterialSource = plugin.materialsConf.getString(materialName+".custom-material.source");
+                    EnchantMaterial enchantMaterial;
+                    if (customMaterialSource.equalsIgnoreCase("itemsadder")) {
+                        // Get the namespace and material name to make retrieving the item via the API easier later
+                        String namespace = plugin.materialsConf.getString(materialName + ".custom-material.namespace");
+                        enchantMaterial = plugin.materialRegistry.getMaterial(namespace + ":" + materialName);
+                    } else {
+                        enchantMaterial = plugin.materialRegistry.getMaterial(materialName);
+                    }
+
+                    PlayerEnchantEvent playerEnchantEvent = new PlayerEnchantEvent(player,currentEnchant,enchantMaterial,matRequirement,levelRequirement);
+                    playerEnchantEvent.callEvent();
 
                     if (plugin.getConfig().getBoolean("play-sound-on-enchant")) {
                         player.playSound(Sound.sound(Key.key("block.enchantment_table.use"), Sound.Source.UI, 0.5F, 1F), Sound.Emitter.self());

@@ -55,6 +55,12 @@
             <id>papermc-repo</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
+
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://www.jitpack.io</url>
+        </repository>
+
     </repositories>
 
     <dependencies>
@@ -70,6 +76,11 @@
             <!-- Replace {version} with the latest version -->
             <version>4.0.18-beta-10</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.MidenTheDev</groupId>
+            <artifactId>ServerLevelsV3</artifactId>
+            <version>1.0-SNAPSHOT-2</version>
         </dependency>
     </dependencies>
 </project>
