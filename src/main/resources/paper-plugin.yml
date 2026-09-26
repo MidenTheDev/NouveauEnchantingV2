@@ -11,6 +11,10 @@ dependencies:
       load: BEFORE
       required: false
       join-classpath: true
+    ServerLevels:
+      load: BEFORE
+      required: false
+      join-classpath: true
 
 commands:
   nedebug:

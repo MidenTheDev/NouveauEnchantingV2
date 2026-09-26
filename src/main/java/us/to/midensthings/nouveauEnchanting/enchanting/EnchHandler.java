@@ -176,7 +176,7 @@ public class EnchHandler {
         return result;
     }
 
-    private EnchantMaterial getCompatibleEnchantMaterial(ItemStack material) {
+    public EnchantMaterial getCompatibleEnchantMaterial(ItemStack material) {
         EnchantMaterial enchMaterial;
 
         // Check for compats and get the material according to compat or vanilla

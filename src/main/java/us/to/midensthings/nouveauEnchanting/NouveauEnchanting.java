@@ -84,6 +84,10 @@ public final class NouveauEnchanting extends JavaPlugin {
             enabledCompats.add("ItemsAdder");
             logger.info("ItemsAdder Compatibility Enabled");
         }
+        if (pm.getPlugin("ServerLevels") != null) {
+            enabledCompats.add("ServerLevels");
+            logger.info("ServerLevels Compatibility Enabled");
+        }
 
     }
 

@@ -4,9 +4,11 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,10 +20,15 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import us.to.midensthings.nouveauEnchanting.NouveauEnchanting;
 import us.to.midensthings.nouveauEnchanting.compat.ItemsAdderCompat;
+import us.to.midensthings.nouveauEnchanting.compat.ServerLevelsCompat;
 import us.to.midensthings.nouveauEnchanting.customevents.PlayerEnchantEvent;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchHandler;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantMaterial;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantingGUI;
+import us.to.midensthings.serverLevels.ServerLevels;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class InventoryClick implements Listener {
 
@@ -131,6 +138,38 @@ public class InventoryClick implements Listener {
                         return;
                     }
 
+                    // Check if enchant has an SL requirement
+                    if (plugin.enabledCompats.contains("ServerLevels")) {
+                        String slReqPath = materialName+"."+
+                                currentEnchant.getKey().asString().substring(10)+"."+
+                                resultEnchantLevel+"."+
+                                "sl-requirements";
+                        ConfigurationSection configurationSection = plugin.materialsConf.getConfigurationSection(slReqPath);
+                        if (configurationSection == null) {
+                            slReqPath = materialName.toLowerCase()+"."+
+                                    currentEnchant.getKey().asString().substring(10)+"."+
+                                    resultEnchantLevel+"."+
+                                    "sl-requirements";
+                            configurationSection = plugin.materialsConf.getConfigurationSection(slReqPath);
+                        }
+                        // If there are ServerLevels requirements for this level
+                        if (configurationSection != null) {
+                            // Check if player's current level is at or above the minimum
+                            ServerLevelsCompat slCompat = new ServerLevelsCompat();
+                            int playerLevel = slCompat.getPlayerLevel(player,plugin.materialsConf.getString(slReqPath+".system-name"));
+                            int requiredLevel = plugin.materialsConf.getInt(slReqPath+".level");
+                            if (playerLevel < requiredLevel) {
+                                Component msg = Component.text("Your enchanting level is too low! Current level: "+playerLevel+" Required level: "+requiredLevel, TextColor.color(Color.RED.asRGB()));
+                                if (plugin.materialsConf.getString(slReqPath+".low-level-msg") != null) {
+                                    msg = MiniMessage.miniMessage().deserialize(plugin.materialsConf.getString(slReqPath+".low-level-msg").replace("%level%",String.valueOf(playerLevel)));
+                                }
+                                player.sendMessage(msg);
+                                event.setCancelled(true);
+                                return;
+                            }
+                        }
+                    }
+
                     // Take required materials and levels, do not cancel event (let player take item)
                     inv.setItem(toolSlot, ItemStack.empty());
                     inv.getItem(materialSlot).subtract(matRequirement);
@@ -138,13 +177,18 @@ public class InventoryClick implements Listener {
 
                     String customMaterialSource = plugin.materialsConf.getString(materialName+".custom-material.source");
                     EnchantMaterial enchantMaterial;
-                    if (customMaterialSource.equalsIgnoreCase("itemsadder")) {
-                        // Get the namespace and material name to make retrieving the item via the API easier later
-                        String namespace = plugin.materialsConf.getString(materialName + ".custom-material.namespace");
-                        enchantMaterial = plugin.materialRegistry.getMaterial(namespace + ":" + materialName);
+                    if (customMaterialSource != null) {
+                        if (customMaterialSource.equalsIgnoreCase("itemsadder")) {
+                            // Get the namespace and material name to make retrieving the item via the API easier later
+                            String namespace = plugin.materialsConf.getString(materialName + ".custom-material.namespace");
+                            enchantMaterial = plugin.materialRegistry.getMaterial(namespace + ":" + materialName);
+                        } else {
+                            enchantMaterial = plugin.materialRegistry.getMaterial(materialName);
+                        }
                     } else {
                         enchantMaterial = plugin.materialRegistry.getMaterial(materialName);
                     }
+
 
                     PlayerEnchantEvent playerEnchantEvent = new PlayerEnchantEvent(player,currentEnchant,enchantMaterial,matRequirement,levelRequirement);
                     playerEnchantEvent.callEvent();
@@ -196,8 +240,28 @@ public class InventoryClick implements Listener {
         // else, run enchant logic
         EnchHandler eHandler = eGUI.getEnchHandler();
         if (eHandler.isValidRecipe(toolItem, materialItem)) {
+            ItemStack resultItem = eHandler.getAppliedItem(toolItem, materialItem);
+            inv.setItem(resultSlot,resultItem);
 
-            inv.setItem(resultSlot,eHandler.getAppliedItem(toolItem, materialItem));
+            // Check if enchant has a ServerLevels Requirement
+            if (plugin.enabledCompats.contains("ServerLevels")) {
+                String slReqPath = eHandler.getCompatibleEnchantMaterial(materialItem).getMaterialName()+"."+
+                        eHandler.getLastEnchant().getKey().asString().substring(10)+"."+
+                        resultItem.getEnchantmentLevel(eHandler.getLastEnchant())+"."+
+                        "sl-requirements";
+                // If there are ServerLevels requirements for this level
+                if (plugin.materialsConf.getConfigurationSection(slReqPath) != null) {
+                    // Requires (system name) level (required level)
+                    Component lvlReq = Component.text("Requires "+
+                            plugin.materialsConf.getString(slReqPath+".system-name")+
+                            " level "+
+                            plugin.materialsConf.getInt(slReqPath+".level"),TextColor.color(Color.LIME.asRGB()));
+                    List<Component> extraLore = new ArrayList<>();
+                    extraLore.add(lvlReq);
+                    eGUI.updateCostText(extraLore);
+                    return;
+                }
+            }
 
             // Update cost preview
             eGUI.updateCostText();

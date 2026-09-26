@@ -111,10 +111,28 @@ public class EnchantingGUI implements InventoryHolder {
         List<Component> newLore = new ArrayList<>();
 
         newLore.add(matCostComponent);
+
         costPreviewMeta.lore(newLore);
 
         inv.getItem(costPreviewSlot).setItemMeta(costPreviewMeta);
 
+    }
+
+    public void updateCostText(List<Component> extraLore) {
+        ItemMeta costPreviewMeta = inv.getItem(costPreviewSlot).getItemMeta();
+
+        final Component levelCostComponent = Component.text("Cost: " + enchHandler.getCurrentEnchantLevelCost() + " levels").color(TextColor.color(Color.FUCHSIA.asRGB()));
+        final Component matCostComponent = Component.text("Material Cost: " + enchHandler.getCurrentEnchantMaterialCost()).color(TextColor.color(Color.AQUA.asRGB()));
+
+        costPreviewMeta.customName(levelCostComponent);
+        List<Component> newLore = new ArrayList<>();
+
+        newLore.add(matCostComponent);
+        newLore.addAll(extraLore);
+
+        costPreviewMeta.lore(newLore);
+
+        inv.getItem(costPreviewSlot).setItemMeta(costPreviewMeta);
 
     }
 
