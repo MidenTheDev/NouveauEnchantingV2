@@ -19,6 +19,7 @@ Everything in the plugin is configurable via the materials.yml file and you can 
 | Plugin |Has Support   |
 | ------------ | ------------ |
 |ItemsAdder  | :white_check_mark:  |
+|ServerLevels| :white_check_mark: |
 | Oraxen  | :x:  |
 |CraftEngine| :x: (planned)|
 
