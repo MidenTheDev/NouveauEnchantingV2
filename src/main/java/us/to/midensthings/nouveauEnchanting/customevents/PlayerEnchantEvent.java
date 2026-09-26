@@ -19,19 +19,25 @@ public class PlayerEnchantEvent extends Event {
 
     private EnchantMaterial enchantMaterial;
 
+    private int enchantmentLevel;
     private int materialCost;
-    private int expcCost;
+    private int expCost;
 
-    public PlayerEnchantEvent(Player player, Enchantment enchantment, EnchantMaterial enchantMaterial, int materialCost, int expcCost) {
+    public PlayerEnchantEvent(Player player, Enchantment enchantment, EnchantMaterial enchantMaterial, int materialCost, int expCost, int enchantmentLevel) {
         this.player = player;
         this.enchantment = enchantment;
         this.enchantMaterial = enchantMaterial;
         this.materialCost = materialCost;
-        this.expcCost = expcCost;
+        this.expCost = expCost;
+        this.enchantmentLevel = enchantmentLevel;
     }
 
     public Player getPlayer() {
         return player;
+    }
+
+    public int getEnchantmentLevel() {
+        return enchantmentLevel;
     }
 
     public Enchantment getEnchantment() {
@@ -46,8 +52,8 @@ public class PlayerEnchantEvent extends Event {
         return materialCost;
     }
 
-    public int getExpcCost() {
-        return expcCost;
+    public int getExpCost() {
+        return expCost;
     }
 
     public static HandlerList getHandlerList() {

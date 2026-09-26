@@ -189,8 +189,8 @@ public class InventoryClick implements Listener {
                         enchantMaterial = plugin.materialRegistry.getMaterial(materialName);
                     }
 
-
-                    PlayerEnchantEvent playerEnchantEvent = new PlayerEnchantEvent(player,currentEnchant,enchantMaterial,matRequirement,levelRequirement);
+                    // Call the player enchant event
+                    PlayerEnchantEvent playerEnchantEvent = new PlayerEnchantEvent(player,currentEnchant,enchantMaterial,matRequirement,levelRequirement,resultEnchantLevel);
                     playerEnchantEvent.callEvent();
 
                     if (plugin.getConfig().getBoolean("play-sound-on-enchant")) {
