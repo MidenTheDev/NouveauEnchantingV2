@@ -21,7 +21,7 @@ Everything in the plugin is configurable via the materials.yml file and you can 
 |ItemsAdder  | :white_check_mark:  |
 |ServerLevels| :white_check_mark: |
 | Oraxen  | :x:  |
-|CraftEngine| :x: (planned)|
+|CraftEngine| :white_check_mark: (planned)|
 
 Please note: **changes to your materials.yml file require a full server restart to apply!**
 ## :sparkles: Vanilla Enchant Overrides:
