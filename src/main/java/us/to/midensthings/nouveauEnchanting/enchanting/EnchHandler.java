@@ -8,6 +8,7 @@ import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import us.to.midensthings.nouveauEnchanting.NouveauEnchanting;
+import us.to.midensthings.nouveauEnchanting.compat.CraftEngineCompat;
 import us.to.midensthings.nouveauEnchanting.compat.ItemsAdderCompat;
 
 public class EnchHandler {
@@ -148,6 +149,10 @@ public class EnchHandler {
                             String unNamespacedID = enchMaterial.getMaterialName();
                             unNamespacedID = unNamespacedID.substring(unNamespacedID.indexOf(":")+1);
                             currentEnchantMaterialCost = plugin.materialsConf.getInt(unNamespacedID + "." + enchantKey + "." + enchantLevel + ".material-cost");
+                        } else if (enchMaterial.getCustomMaterialSource().equalsIgnoreCase("CraftEngine")) {
+                            String unNamespacedID = enchMaterial.getMaterialName();
+                            unNamespacedID = unNamespacedID.substring(unNamespacedID.indexOf(":")+1);
+                            currentEnchantMaterialCost = plugin.materialsConf.getInt(unNamespacedID + "." + enchantKey + "." + enchantLevel + ".material-cost");
                         }
                     } else {
                         currentEnchantMaterialCost = plugin.materialsConf.getInt(enchMaterial.getMaterialName().toLowerCase() + "." + enchantKey + "." + enchantLevel + ".material-cost");
@@ -158,6 +163,11 @@ public class EnchHandler {
                 if (currentEnchantLevelCost == 0) {
                     if (enchMaterial.isCustomMaterial) {
                         if (enchMaterial.getCustomMaterialSource().equalsIgnoreCase("ItemsAdder")) {
+                            String unNamespacedID = enchMaterial.getMaterialName();
+                            unNamespacedID = unNamespacedID.substring(unNamespacedID.indexOf(":")+1);
+                            currentEnchantLevelCost = plugin.materialsConf.getInt(unNamespacedID + "." + enchantKey + "." + enchantLevel + ".level-cost");
+
+                        } else if (enchMaterial.getCustomMaterialSource().equalsIgnoreCase("CraftEngine")) {
                             String unNamespacedID = enchMaterial.getMaterialName();
                             unNamespacedID = unNamespacedID.substring(unNamespacedID.indexOf(":")+1);
                             currentEnchantLevelCost = plugin.materialsConf.getInt(unNamespacedID + "." + enchantKey + "." + enchantLevel + ".level-cost");
@@ -187,7 +197,18 @@ public class EnchHandler {
             } else {
                 enchMaterial = plugin.materialRegistry.getMaterial(material.getType().name());
             }
-        } else {
+        }
+
+        else if (plugin.enabledCompats.contains("CraftEngine")) {
+            CraftEngineCompat ceComp = new CraftEngineCompat();
+            if (ceComp.isCustomItem(material)) {
+                enchMaterial = plugin.materialRegistry.getMaterial(ceComp.getItemID(material));
+            } else {
+                enchMaterial = plugin.materialRegistry.getMaterial(material.getType().name());
+            }
+        }
+
+        else {
             enchMaterial = plugin.materialRegistry.getMaterial(material.getType().name());
         }
         return enchMaterial;

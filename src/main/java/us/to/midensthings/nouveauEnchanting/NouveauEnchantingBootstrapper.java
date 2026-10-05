@@ -95,7 +95,14 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
                         String namespace = materialsConf.getString(material+".custom-material.namespace");
                         enchantMaterial = new EnchantMaterial(namespace+":"+material,enchantKeys,true,customMaterialSource);
                         materialRegistry.addMaterial(material, enchantMaterial);
-                    } else {
+                    } else if (customMaterialSource.equalsIgnoreCase("craftengine")) {
+                        // Get the namespace and material name to make retrieving the item via the API easier later
+                        String namespace = materialsConf.getString(material+".custom-material.namespace");
+                        enchantMaterial = new EnchantMaterial(namespace+":"+material,enchantKeys,true,customMaterialSource);
+                        materialRegistry.addMaterial(material, enchantMaterial);
+                    }
+
+                    else {
                         // no support for whatever plugin is specified.
                         logger.warn("No compatibility module found for custom material source plugin " + customMaterialSource);
                     }

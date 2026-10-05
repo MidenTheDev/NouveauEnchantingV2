@@ -6,7 +6,7 @@
 
     <groupId>us.to.midensthings</groupId>
     <artifactId>NouveauEnchanting</artifactId>
-    <version>1.0.1-SNAPSHOT-1</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>NouveauEnchanting</name>
@@ -55,7 +55,10 @@
             <id>papermc-repo</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
-
+        <repository>
+            <id>momirealms-repo</id>
+            <url>https://repo.momirealms.net/releases/</url>
+        </repository>
         <repository>
             <id>jitpack.io</id>
             <url>https://www.jitpack.io</url>
@@ -80,7 +83,19 @@
         <dependency>
             <groupId>com.github.MidenTheDev</groupId>
             <artifactId>ServerLevelsV3</artifactId>
-            <version>master-SNAPSHOT</version>
+            <version>master-0ac5c1bad7-1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.momirealms</groupId>
+            <artifactId>craft-engine-core</artifactId>
+            <version>26.9</version> <!-- replace "{version}" with the plugin stable version -->
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.momirealms</groupId>
+            <artifactId>craft-engine-bukkit</artifactId>
+            <version>26.9</version> <!-- for instance 0.0.60 -->
             <scope>provided</scope>
         </dependency>
     </dependencies>

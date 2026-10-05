@@ -19,6 +19,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import us.to.midensthings.nouveauEnchanting.NouveauEnchanting;
+import us.to.midensthings.nouveauEnchanting.compat.CraftEngineCompat;
 import us.to.midensthings.nouveauEnchanting.compat.ItemsAdderCompat;
 import us.to.midensthings.nouveauEnchanting.compat.ServerLevelsCompat;
 import us.to.midensthings.nouveauEnchanting.customevents.PlayerEnchantEvent;
@@ -110,7 +111,18 @@ public class InventoryClick implements Listener {
                         } else {
                             materialName = materialItem.getType().name();
                         }
-                    } else {
+                    }
+
+                    else if (plugin.enabledCompats.contains("CraftEngine")) {
+                        CraftEngineCompat ceComp = new CraftEngineCompat();
+                        if (ceComp.isCustomItem(materialItem)) {
+                            materialName = ceComp.getItemID(materialItem);
+                        } else {
+                            materialName = materialItem.getType().name();
+                        }
+                    }
+
+                    else {
                         materialName = materialItem.getType().name();
                     }
 

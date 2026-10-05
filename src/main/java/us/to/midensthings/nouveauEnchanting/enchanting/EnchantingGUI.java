@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import us.to.midensthings.nouveauEnchanting.NouveauEnchanting;
+import us.to.midensthings.nouveauEnchanting.compat.CraftEngineCompat;
 import us.to.midensthings.nouveauEnchanting.compat.ItemsAdderCompat;
 
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ public class EnchantingGUI implements InventoryHolder {
     protected ItemStack createGuiItem(Component name, Component lore) {
         ItemStack item;
         if (config.getConfigurationSection("gui-info.cost-preview-item.custom-material") != null) {
+            // Check for and handle ItemsAdder custom item in GUI
             if (config.getString("gui-info.cost-preview-item.custom-material.source").equalsIgnoreCase("ItemsAdder")) {
                 if (plugin.enabledCompats.contains("ItemsAdder")) {
                     ItemsAdderCompat iacomp = new ItemsAdderCompat();
@@ -70,7 +72,18 @@ public class EnchantingGUI implements InventoryHolder {
                     // error in config somewhere, default to book
                     item = ItemStack.of(Material.ENCHANTED_BOOK);
                 }
-            } else {
+            }
+            // Check for and handle CraftEngine item in GUI
+            else if (config.getString("gui-info.cost-preview-item.custom-material.source").equalsIgnoreCase("CraftEngine")) {
+                if (plugin.enabledCompats.contains("CraftEngine")) {
+                    CraftEngineCompat ceComp = new CraftEngineCompat();
+                    item = ceComp.getItemStack(config.getString("gui-info.cost-preview-item.custom-material.namespace")+":"+config.getString("gui-info.cost-preview-item.material"));
+                } else {
+                    // error in config somewhere, default to book
+                    item = ItemStack.of(Material.ENCHANTED_BOOK);
+                }
+            }
+            else {
                 // error in config somewhere, default to book
                 item = ItemStack.of(Material.ENCHANTED_BOOK);
             }
