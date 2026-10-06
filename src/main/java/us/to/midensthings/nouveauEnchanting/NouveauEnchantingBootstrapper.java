@@ -192,7 +192,7 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
 
                 // Check if the tag exists
 
-                if (tagsConf.getStringList(inputString) == null) {
+                if (tagsConf.getStringList(inputString).isEmpty()) {
                     continue;
                 }
 
