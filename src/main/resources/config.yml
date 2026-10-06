@@ -22,12 +22,18 @@ gui-info:
   # Inventory slot that the resulting enchanted item shows up on
   cost-preview-item:
     material: ENCHANTED_BOOK
+
+# Itemsadder arrow example:
 #    material: icon_right_blue
 #    custom-material:
 #      source: "itemsadder"
 #      namespace: "_iainternal"
 
-
+# CraftEngine arrow example:
+#    material: next_page_0
+#    custom-material:
+#      source: "craftengine"
+#      namespace: "internal"
 
 
 
