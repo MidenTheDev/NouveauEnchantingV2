@@ -123,9 +123,21 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
             }
 
             context.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.entryAdd()
-                    // Set Max Level
-                    .newHandler(event -> event.builder().maxLevel(enchantsConf.getInt(enchant+".max-level"))
+                    .newHandler(event -> event.builder()
+                            // Set Max Level
+                            .maxLevel(enchantsConf.getInt(enchant+".max-level"))
+                            // Set supported items
                             .supportedItems(allowedItems)
+
+                            // TODO Set enchantment conflicts
+                            // TODO Set Primary/Secondary enchants
+                            // TODO Set Anivl Cost
+                            // TODO Set Description
+                            // TODO Set Min Cost
+                            // TODO Set Max Cost
+                            // TODO Set Weight
+                            // TODO Set Active Slots
+
 
                     )
 

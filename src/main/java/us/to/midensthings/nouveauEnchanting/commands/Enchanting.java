@@ -5,6 +5,8 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
@@ -36,15 +38,16 @@ public class Enchanting {
                 player.openInventory(new EnchantingGUI().getInventory());
 
                 return Command.SINGLE_SUCCESS;
-            }))
-
-            .then(Commands.literal("openguiOther").then(Commands.argument("player", StringArgumentType.word()).executes(ctx -> {
-                Player player = Bukkit.getPlayer(StringArgumentType.getString(ctx,"player"));
+            }) .then(Commands.argument("player",ArgumentTypes.player()).executes(ctx -> {
                 CommandSender sender = ctx.getSource().getSender();
                 if (!sender.hasPermission("nouveauenchanting.commands.gui.other")) {
                     sender.sendMessage(Component.text("You do not have permission to use this command!").color(TextColor.color(Color.RED.asRGB())));
                     return Command.SINGLE_SUCCESS;
                 }
+
+                final PlayerSelectorArgumentResolver resolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+                Player player = resolver.resolve(ctx.getSource()).getFirst();
+
                 if (player == null || !player.isOnline()) {
                     sender.sendMessage(Component.text("That player is not online!").color(TextColor.color(Color.RED.asRGB())));
                     return Command.SINGLE_SUCCESS;
@@ -53,6 +56,7 @@ public class Enchanting {
                 player.openInventory(new EnchantingGUI().getInventory());
                 sender.sendMessage(Component.text("Opened enchanting window for "+player.getName()).color(TextColor.color(Color.RED.asRGB())));
                 return Command.SINGLE_SUCCESS;
+
             })))
 
             .then(Commands.literal("reload").executes(ctx -> {
