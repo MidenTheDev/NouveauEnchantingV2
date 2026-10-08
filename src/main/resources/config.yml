@@ -7,6 +7,9 @@ override-enchanting-table: true
 play-sound-on-enchant: true
 # Whether or not to play a sound effect when the player enchants an item
 
+check-for-updates: true
+# Checks Modrinth on startup and logs a message if a newer release is available.
+
 gui-info:
   fill-inventory: true
   # Whether or not to fill the enchanting gui with glass panes

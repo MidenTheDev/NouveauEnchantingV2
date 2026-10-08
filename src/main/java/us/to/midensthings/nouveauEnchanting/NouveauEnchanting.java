@@ -12,6 +12,7 @@ import us.to.midensthings.nouveauEnchanting.enchanting.MaterialRegistry;
 import us.to.midensthings.nouveauEnchanting.events.InventoryClick;
 import us.to.midensthings.nouveauEnchanting.events.InventoryClose;
 import us.to.midensthings.nouveauEnchanting.events.OpenEnchantingTable;
+import us.to.midensthings.nouveauEnchanting.util.UpdateTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ public final class NouveauEnchanting extends JavaPlugin {
     public MaterialRegistry materialRegistry;
 
     public List<String> enabledCompats;
-
+    private UpdateTracker updateTracker;
 
 
     public NouveauEnchanting(MaterialRegistry bootstrapRegistry, YamlConfiguration bootMaterialsConf, YamlConfiguration bootEnchantsConf, YamlConfiguration bootTagsConf) {
@@ -50,6 +51,11 @@ public final class NouveauEnchanting extends JavaPlugin {
         loadCompats();
         registerEvents();
         registerCommands();
+
+        if (getConfig().getBoolean("check-for-updates")) {
+            this.updateTracker = new UpdateTracker();
+            updateTracker.checkForUpdates();
+        }
 
     }
     @Override
@@ -102,6 +108,10 @@ public final class NouveauEnchanting extends JavaPlugin {
         config = this.getConfig();
 
 
+    }
+
+    public UpdateTracker getUpdateTracker() {
+        return updateTracker;
     }
 
 }
