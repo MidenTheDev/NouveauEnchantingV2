@@ -3,7 +3,7 @@ aqua_affinity:
   allowed-items:
     - "#helmets"
 
-bane_of_arthopods:
+bane_of_arthropods:
   max-level: 5
   allowed-items:
     - "#swords"
