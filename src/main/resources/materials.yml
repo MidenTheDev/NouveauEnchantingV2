@@ -249,7 +249,7 @@ ender_eye:
       material-cost: 3
 
 flint:
-  bane_of_arthopods:
+  bane_of_arthropods:
     1:
       level-cost: 4
       material-cost: 4
