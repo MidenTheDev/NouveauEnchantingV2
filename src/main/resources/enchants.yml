@@ -235,7 +235,7 @@ sharpness:
     - "#spears"
 
 silk_touch:
-  max-level: 3
+  max-level: 1
   allowed-items:
     - "#pickaxes"
     - "#axes"
