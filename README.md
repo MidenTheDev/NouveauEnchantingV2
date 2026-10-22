@@ -1,8 +1,8 @@
 # Nouveau Enchanting
 <div align=center>
 
-[<img src="https://github.com/iuriineves/modding-badges/blob/main/Available%20on%20Modrinth.png?raw=true" width="200"/>]([https://modrinth.com/](https://modrinth.com/plugin/nouveau-enchanting))
-[<img src="https://github.com/iuriineves/modding-badges/blob/main/Source%20on%20GitHub.png?raw=true" width="200"/>]([https://github.com/iuriineves/Neves-Capybaras](https://github.com/MidenTheDev/NouveauEnchantingV2))
+[<img src="https://github.com/iuriineves/modding-badges/blob/main/Available%20on%20Modrinth.png?raw=true" width="200"/>](https://modrinth.com/plugin/nouveau-enchanting)
+[<img src="https://github.com/iuriineves/modding-badges/blob/main/Source%20on%20GitHub.png?raw=true" width="200"/>](https://github.com/MidenTheDev/NouveauEnchantingV2)
 [<img src="https://raw.githubusercontent.com/MidenTheDev/NouveauEnchantingV2/refs/heads/master/page_resources/RequiresPaper.png" width="162"/>](https://papermc.io)
 [<img src="https://github.com/iuriineves/modding-badges/blob/main/Support%20me%20on%20Ko-Fi.png?raw=true" width="236"/>](https://ko-fi.com/miden)
 
