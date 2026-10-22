@@ -19,7 +19,7 @@
 A complete, ground-up overhaul of Minecraft's Enchanting system inspired by Tinkers' Construct for Paper Minecraft Servers
 
 
-## :crystal_ball: Material-Based Enchanting:
+## 🔮 Material-Based Enchanting:
 Enchant your tools, weapons, and armor incrementally by using materials and exp instead of farming for villagers or gambling for the right enchants in the enchanting table.
 
 For example, to add Sharpness 1 to a sword, you go to the enchanting table with some nether quartz. The table will take 4 levels and 8 quartz to apply Sharpness 1. Then, to apply Sharpness 2, take that sword with Sharpness 1, put it back in the table with some more quartz, and it will take 6 levels and 4 quartz and apply Sharpness 2, and so on and so forth.
@@ -32,27 +32,27 @@ Everything in the plugin is configurable via the materials.yml file and you can 
 
 | Plugin |Has Support   |
 | ------------ | ------------ |
-|ItemsAdder  | :white_check_mark:  |
+|ItemsAdder  | ✅  |
 |ServerLevels| ✅ (v 1.0.1) |
-| Oraxen  | :x:  |
+| Oraxen  | ❌  |
 |CraftEngine| ✅ (v 1.0.1) |
 
 Please note: **changes to your materials.yml file require a full server restart to apply!**
-## :sparkles: Vanilla Enchant Overrides:
+## ✨ Vanilla Enchant Overrides:
 Using Paper's new Registry API, this plugin allows you to directly modify the vanilla game's Enchants. Currently you can:
 - Change what items Enchants can be applied to
 - Change the max level of vanilla Enchants
 
 All of this is done in the plugin's enchants.yml file, which comes pre-configured with every enchant in the game set to their vanilla values. **Updates to this file require a full server restart!**
 
-## :computer: Commands:
+## 💻 Commands:
 **/ne reload** - Reloads the config.yml. Does **NOT** reload enchants.yml or materials.yml. Changes to these files require a full server restart.
 
 **/ne opengui** - Opens the Enchanting GUI for yourself
 
-**/ne openguiOther [player]** - Opens the Enchanting GUI for the specified player
+**/ne opengui [player]** - Opens the Enchanting GUI for the specified player
 
-## :watch: Planned Features:
+## ⌚ Planned Features:
 Eventually, I would like for this plugin to:
 - Modify anvil behavior to block the application of enchanted books
 - Modify Villager trades to remove enchanted books and enchanted tools (Likely as a separate plugin)
@@ -61,7 +61,7 @@ Eventually, I would like for this plugin to:
 
 None of the above features are currently implemented in the plugin, but are planned for future updates.
 
-## :question: FAQ:
+## ❓ FAQ:
 
 #### Q:  I Need Help! X Isn't working!
 **A: **Check the relevant Wiki page. If the Wiki isn't helpful or you otherwise don't understand, join the Discord Server and ask for support there. (Discord W.I.P)
