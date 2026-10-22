@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
@@ -47,7 +48,9 @@ public class InventoryClick implements Listener {
         if (!(event.getInventory().getHolder() instanceof EnchantingGUI)) {
             return;
         }
-
+        if (event.isShiftClick() || event.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
+            event.setCancelled(true);
+        }
         Inventory inv = event.getInventory();
         EnchantingGUI eGUI = (EnchantingGUI) inv.getHolder();
         // Check if the Tool Slot was clicked
@@ -216,9 +219,6 @@ public class InventoryClick implements Listener {
         } else {
 
                 if (event.getRawSlot()<27) {
-                    event.setCancelled(true);
-                }
-                if (event.getClick() == ClickType.SHIFT_LEFT) {
                     event.setCancelled(true);
                 }
 

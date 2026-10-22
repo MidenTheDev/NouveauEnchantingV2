@@ -20,16 +20,6 @@ dependencies:
       required: false
       join-classpath: true
 
-commands:
-  nedebug:
-    description: "Debug command for Nouveau Enchanting"
-    usage: "/nedebug"
-    permission: nouveauenchanting.commands.debug
-  ne:
-    description: "Core for Nouveau Enchanting"
-    usage: "/ne"
-    permission: nouveauenchanting.commands.core
-
 permissions:
   nouveauenchanting.commands.debug:
     default: op

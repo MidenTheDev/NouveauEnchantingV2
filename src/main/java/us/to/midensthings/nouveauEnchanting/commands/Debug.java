@@ -14,6 +14,7 @@ public class Debug {
     private final NouveauEnchanting plugin = NouveauEnchanting.getPlugin(NouveauEnchanting.class);
 
     public LiteralCommandNode<CommandSourceStack> debugRootBuilder = Commands.literal("nedebug")
+            .requires(source -> source.getSender().hasPermission("nouveauenchanting.commands.debug"))
 
             // Material Registry Check debug command displays all registered enchant materials and their associated enchantments
             .then(Commands.literal("matreg").executes(ctx -> {

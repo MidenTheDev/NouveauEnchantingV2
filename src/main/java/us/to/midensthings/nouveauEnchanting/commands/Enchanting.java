@@ -19,15 +19,11 @@ import us.to.midensthings.nouveauEnchanting.enchanting.EnchantingGUI;
 
 public class Enchanting {
     private final NouveauEnchanting plugin = NouveauEnchanting.getPlugin(NouveauEnchanting.class);
-    public LiteralCommandNode<CommandSourceStack> coreCommandBuilder = Commands.literal("ne")
+    public LiteralCommandNode<CommandSourceStack> coreCommandBuilder = Commands.literal("ne").requires(source -> source.getSender().hasPermission("nouveauenchanting.commands.core"))
 
             // Material Registry Check debug command displays all registered enchant materials and their associated enchantments
-            .then(Commands.literal("opengui").executes(ctx -> {
+            .then(Commands.literal("opengui").requires(source -> source.getSender().hasPermission("nouveauenchanting.commands.gui")).executes(ctx -> {
                 CommandSender sender = ctx.getSource().getSender();
-                        if (!sender.hasPermission("nouveauenchanting.commands.gui")) {
-                            sender.sendMessage(Component.text("You do not have permission to use this command!").color(TextColor.color(Color.RED.asRGB())));
-                            return Command.SINGLE_SUCCESS;
-                        }
 
                 if (!(sender instanceof Player)) {
                     sender.sendMessage(Component.text("You must specify a player!").color(TextColor.color(Color.RED.asRGB())));
@@ -38,12 +34,8 @@ public class Enchanting {
                 player.openInventory(new EnchantingGUI().getInventory());
 
                 return Command.SINGLE_SUCCESS;
-            }) .then(Commands.argument("player",ArgumentTypes.player()).executes(ctx -> {
+            }) .then(Commands.argument("player",ArgumentTypes.player()).requires(source -> source.getSender().hasPermission("nouveauenchanting.commands.gui.other")).executes(ctx -> {
                 CommandSender sender = ctx.getSource().getSender();
-                if (!sender.hasPermission("nouveauenchanting.commands.gui.other")) {
-                    sender.sendMessage(Component.text("You do not have permission to use this command!").color(TextColor.color(Color.RED.asRGB())));
-                    return Command.SINGLE_SUCCESS;
-                }
 
                 final PlayerSelectorArgumentResolver resolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
                 Player player = resolver.resolve(ctx.getSource()).getFirst();
@@ -59,12 +51,8 @@ public class Enchanting {
 
             })))
 
-            .then(Commands.literal("reload").executes(ctx -> {
+            .then(Commands.literal("reload").requires(source -> source.getSender().hasPermission("nouveauenchanting.commands.reload")).executes(ctx -> {
                 CommandSender sender = ctx.getSource().getSender();
-                if (!sender.hasPermission("nouveauenchanting.commands.reload")) {
-                    sender.sendMessage(Component.text("You do not have permission to use this command!").color(TextColor.color(Color.RED.asRGB())));
-                    return Command.SINGLE_SUCCESS;
-                }
                 plugin.reloadConfig();
 
                 sender.sendMessage(Component.text("Warning: this command only reloads the config.yml!").color(TextColor.color(Color.RED.asRGB())));
