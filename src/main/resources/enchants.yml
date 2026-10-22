@@ -141,7 +141,6 @@ loyalty:
   max-level: 3
   allowed-items:
     - "trident"
-    - "#hoes"
 
 luck_of_the_sea:
   max-level: 3
