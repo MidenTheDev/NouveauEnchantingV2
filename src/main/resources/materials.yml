@@ -143,9 +143,6 @@ BREEZE_ROD:
     3:
       level-cost: 4
       material-cost: 4
-    4:
-      level-cost: 4
-      material-cost: 4
 
 heavy_core:
   density:

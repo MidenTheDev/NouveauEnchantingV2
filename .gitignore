@@ -1,3 +1,6 @@
 # Project exclude paths
 /target/
 /page_resources/
+/dependency-reduced-pom.xml
+/.idea/
+/NouveauEnchanting.iml

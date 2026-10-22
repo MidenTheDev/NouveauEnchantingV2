@@ -46,7 +46,7 @@ public class Enchanting {
                 }
 
                 player.openInventory(new EnchantingGUI().getInventory());
-                sender.sendMessage(Component.text("Opened enchanting window for "+player.getName()).color(TextColor.color(Color.RED.asRGB())));
+                sender.sendMessage(Component.text("Opened enchanting window for "+player.getName()).color(TextColor.color(Color.LIME.asRGB())));
                 return Command.SINGLE_SUCCESS;
 
             })))

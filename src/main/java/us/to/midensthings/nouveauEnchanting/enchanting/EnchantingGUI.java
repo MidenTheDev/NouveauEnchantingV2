@@ -62,9 +62,10 @@ public class EnchantingGUI implements InventoryHolder {
     }
     protected ItemStack createGuiItem(Component name, Component lore) {
         ItemStack item;
+        String customSource = config.getString("gui-info.cost-preview-item.custom-material.source");
         if (config.getConfigurationSection("gui-info.cost-preview-item.custom-material") != null) {
             // Check for and handle ItemsAdder custom item in GUI
-            if (config.getString("gui-info.cost-preview-item.custom-material.source").equalsIgnoreCase("ItemsAdder")) {
+            if ("ItemsAdder".equalsIgnoreCase(customSource)) {
                 if (plugin.enabledCompats.contains("ItemsAdder")) {
                     ItemsAdderCompat iacomp = new ItemsAdderCompat();
                     item = iacomp.getItemStack(config.getString("gui-info.cost-preview-item.custom-material.namespace")+":"+config.getString("gui-info.cost-preview-item.material"));
@@ -74,7 +75,7 @@ public class EnchantingGUI implements InventoryHolder {
                 }
             }
             // Check for and handle CraftEngine item in GUI
-            else if (config.getString("gui-info.cost-preview-item.custom-material.source").equalsIgnoreCase("CraftEngine")) {
+            else if ("CraftEngine".equalsIgnoreCase(customSource)) {
                 if (plugin.enabledCompats.contains("CraftEngine")) {
                     CraftEngineCompat ceComp = new CraftEngineCompat();
                     item = ceComp.getItemStack(config.getString("gui-info.cost-preview-item.custom-material.namespace")+":"+config.getString("gui-info.cost-preview-item.material"));
@@ -89,7 +90,14 @@ public class EnchantingGUI implements InventoryHolder {
             }
         } else {
             // Not custom item, load vanilla material from config.
-            item = ItemStack.of(Material.valueOf(config.getString("gui-info.cost-preview-item.material")));
+            String materialName = config.getString("gui-info.cost-preview-item.material");
+            Material material = materialName == null ? null : Material.matchMaterial(materialName);
+            if (material == null || !material.isItem()) {
+                // error in config somewhere, default to book
+                plugin.getLogger().warning("Invalid cost-preview-item material " + materialName + " in config.yml");
+                material = Material.ENCHANTED_BOOK;
+            }
+            item = ItemStack.of(material);
         }
 
         final ItemMeta meta = item.getItemMeta();

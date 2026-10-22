@@ -1,7 +1,7 @@
 package us.to.midensthings.nouveauEnchanting.compat;
 
 import net.momirealms.craftengine.bukkit.api.CraftEngineItems;
-import net.momirealms.craftengine.core.item.setting.ItemSettingsModifierType;
+import net.momirealms.craftengine.bukkit.item.BukkitItemDefinition;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -15,6 +15,11 @@ public class CraftEngineCompat {
         return CraftEngineItems.getCustomItemId(item).value;
     }
     public ItemStack getItemStack(String namespacedItemID) {
-        return CraftEngineItems.byId(namespacedItemID).buildBukkitItem();
+        BukkitItemDefinition item = CraftEngineItems.byId(namespacedItemID);
+        if (item != null) {
+            return item.buildBukkitItem();
+        }
+        // default to enchanted book if item not found
+        return ItemStack.of(Material.ENCHANTED_BOOK);
     }
 }

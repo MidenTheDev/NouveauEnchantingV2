@@ -2,6 +2,7 @@ package us.to.midensthings.nouveauEnchanting;
 
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.*;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
@@ -44,7 +45,7 @@ public final class NouveauEnchanting extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        logger.info("Starting Neuveau Enchanting");
+        logger.info("Starting Nouveau Enchanting");
         pm = Bukkit.getServer().getPluginManager();
 
         loadConfigs();
@@ -60,7 +61,7 @@ public final class NouveauEnchanting extends JavaPlugin {
     }
     @Override
     public void onDisable() {
-        logger.info("Disabling Neuveau Enchanting");
+        logger.info("Disabling Nouveau Enchanting");
         // Plugin shutdown logic
     }
 
@@ -103,10 +104,14 @@ public final class NouveauEnchanting extends JavaPlugin {
 
     public void loadConfigs() {
         // make configs
-        getConfig().options().copyDefaults();
         saveDefaultConfig();
         config = this.getConfig();
 
+        // Warn if the config on disk was made for a different version of the plugin
+        Configuration defaults = config.getDefaults();
+        if (defaults != null && !String.valueOf(defaults.getString("config-version")).equals(config.getString("config-version"))) {
+            logger.warning("config.yml has config-version " + config.getString("config-version") + " but this version of the plugin expects " + defaults.getString("config-version") + ". Missing options will use their defaults.");
+        }
 
     }
 

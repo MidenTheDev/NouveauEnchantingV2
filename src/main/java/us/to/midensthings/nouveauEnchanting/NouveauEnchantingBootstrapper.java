@@ -8,7 +8,6 @@ import io.papermc.paper.registry.TypedKey;
 import io.papermc.paper.registry.event.RegistryEvents;
 import io.papermc.paper.registry.set.RegistryKeySet;
 import io.papermc.paper.registry.set.RegistrySet;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -63,6 +62,10 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
 
         // Check material config for each material, check each enchantment available per material, and load them into the material registry
         materialsConf.getConfigurationSection("").getKeys(false).forEach(material -> {
+            if (materialsConf.getConfigurationSection(material) == null) {
+                logger.warn("Material " + material + " in materials.yml has no enchants listed, skipping");
+                return;
+            }
             List<String> enchantKeys = new ArrayList<>();
             materialsConf.getConfigurationSection(material).getKeys(false).forEach(enchantKey -> {
 
@@ -82,7 +85,7 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
                 enchantMaterial = new EnchantMaterial(Material.valueOf(material.toUpperCase()), enchantKeys);
                 materialRegistry.addMaterial(material.toUpperCase(), enchantMaterial);
             } catch (IllegalArgumentException e) {
-                // If it doesn't, there's no vanilla amterial. Check compats.
+                // If it doesn't, there's no vanilla material. Check compats.
                 // First, check if there's a custom-material section.
                 if (materialsConf.getConfigurationSection(material+".custom-material") == null) {
                     // No custom material section, warn in console
@@ -90,7 +93,9 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
                 } else {
                     // Check the specified custom material source (currently only itemsadder support, maybe more in the future.
                     String customMaterialSource = materialsConf.getString(material+".custom-material.source");
-                    if (customMaterialSource.equalsIgnoreCase("itemsadder")) {
+                    if (customMaterialSource == null) {
+                        logger.warn("No custom-material source set for material " + material);
+                    } else if (customMaterialSource.equalsIgnoreCase("itemsadder")) {
                         // Get the namespace and material name to make retrieving the item via the API easier later
                         String namespace = materialsConf.getString(material+".custom-material.namespace");
                         enchantMaterial = new EnchantMaterial(namespace+":"+material,enchantKeys,true,customMaterialSource);
@@ -116,6 +121,18 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
         // Modify vanilla enchants according to enchants.yml
         enchantsConf.getConfigurationSection("").getKeys(false).forEach(enchant -> {
 
+            NamespacedKey enchantKey = NamespacedKey.fromString(enchant);
+            if (enchantKey == null) {
+                logger.warn("Invalid enchant name " + enchant + " in enchants.yml, skipping");
+                return;
+            }
+
+            int maxLevel = enchantsConf.getInt(enchant+".max-level");
+            if (maxLevel < 1) {
+                logger.warn("Enchant " + enchant + " in enchants.yml needs a max-level of at least 1, skipping");
+                return;
+            }
+
             RegistryKeySet<ItemType> allowedItems = createItemKeySet(tagsConf,enchantsConf.getStringList(enchant+".allowed-items"));
 
             if (allowedItems.isEmpty()) {
@@ -125,13 +142,13 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
             context.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.entryAdd()
                     .newHandler(event -> event.builder()
                             // Set Max Level
-                            .maxLevel(enchantsConf.getInt(enchant+".max-level"))
+                            .maxLevel(maxLevel)
                             // Set supported items
                             .supportedItems(allowedItems)
 
                             // TODO Set enchantment conflicts
                             // TODO Set Primary/Secondary enchants
-                            // TODO Set Anivl Cost
+                            // TODO Set Anvil Cost
                             // TODO Set Description
                             // TODO Set Min Cost
                             // TODO Set Max Cost
@@ -143,7 +160,7 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
 
 
                     // Filter for this specific enchant
-                    .filter(RegistryKey.ENCHANTMENT.typedKey(Key.key("minecraft:"+enchant)))
+                    .filter(RegistryKey.ENCHANTMENT.typedKey(enchantKey))
             );
 
         });
@@ -160,12 +177,10 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
     }
 
     private void generateFile(File file, String filename) {
-
-
-        //Materials YML first
         URL fileURL = getClass().getResource("/"+filename);
         if (fileURL == null) {
-            logger.error("No materials file found! Plugin will not function!");
+            logger.error("No default " + filename + " found in the plugin jar! Plugin will not function!");
+            return;
         }
 
         try {
@@ -177,11 +192,7 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
             // Check if the yml exists and if not, extract the YML from the plugin and copy it to the proper path.
             if (!file.exists()) {
                 try (InputStream in = fileURL.openStream()) {
-                    if (in != null) {
-                        Files.copy(in, file.toPath());
-                    } else {
-
-                    }
+                    Files.copy(in, file.toPath());
                 }
             }
         } catch (IOException e) {
@@ -205,31 +216,31 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
                 // Check if the tag exists
 
                 if (tagsConf.getStringList(inputString).isEmpty()) {
+                    logger.warn("Unknown or empty tag #" + inputString + " in enchants.yml");
                     continue;
                 }
 
                 // Get all the itemtypes associated with the tag and add it to our key list.
-                tagsConf.getStringList(inputString).forEach(item -> {
-                    NamespacedKey itemKey = parseNamespacedKey(item);
-                    resolvedKeys.add(TypedKey.create(RegistryKey.ITEM, itemKey));
-                });
+                tagsConf.getStringList(inputString).forEach(item -> addItemKey(resolvedKeys, item.toLowerCase()));
 
             }
             // Handle Direct Item Names (e.g., "diamond_sword")
             else {
-                NamespacedKey itemKey = parseNamespacedKey(inputString);
-                resolvedKeys.add(TypedKey.create(RegistryKey.ITEM, itemKey));
+                addItemKey(resolvedKeys, inputString);
             }
         }
         // Return registry key set from the resolved keys item list
         return RegistrySet.keySet(RegistryKey.ITEM, resolvedKeys);
     }
 
-    private  NamespacedKey parseNamespacedKey(String input) {
-        if (input.contains(":")) {
-            return NamespacedKey.fromString(input);
+    private void addItemKey(List<TypedKey<ItemType>> resolvedKeys, String item) {
+        // Defaults to "minecraft" namespace if omitted
+        NamespacedKey itemKey = NamespacedKey.fromString(item);
+        // Unknown items would break the registry, so skip them. Only vanilla items can be checked here.
+        if (itemKey == null || (itemKey.getNamespace().equals(NamespacedKey.MINECRAFT) && Material.getMaterial(itemKey.getKey().toUpperCase()) == null)) {
+            logger.warn("Unknown item " + item + " in enchants.yml or tags.yml, skipping");
+            return;
         }
-        // Default to "minecraft" namespace if omitted
-        return NamespacedKey.minecraft(input);
+        resolvedKeys.add(TypedKey.create(RegistryKey.ITEM, itemKey));
     }
 }
