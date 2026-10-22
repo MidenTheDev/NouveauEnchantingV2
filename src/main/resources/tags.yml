@@ -131,4 +131,13 @@ helmets:
   - netherite_helmet
   - turtle_helmet
 
+heads:
+  - player_head
+  - zombie_head
+  - creeper_head
+  - skeleton_skull
+  - wither_skeleton_skull
+  - piglin_head
+  - dragon_head
+
 

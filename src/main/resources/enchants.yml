@@ -30,6 +30,7 @@ binding_curse:
   max-level: 1
   allowed-items:
     - "#armor"
+    - "#heads"
     - "elytra"
     - "carved_pumpkin"
 
@@ -48,11 +49,13 @@ vanishing_curse:
     - "shears"
     - "flint_and_steel"
     - "compass"
+    - "recovery_compass" # Bedrock only
     - "carrot_on_a_stick"
     - "warped_fungus_on_a_stick"
     - "shield"
     - "elytra"
     - "carved_pumpkin"
+    - "#heads"
     - "trident"
     - "crossbow"
     - "brush"
@@ -240,7 +243,7 @@ silk_touch:
     - "#axes"
     - "#shovels"
     - "#hoes"
-    - "shears"
+    - "shears" # Bedrock only
 
 smite:
   max-level: 5
@@ -255,7 +258,7 @@ soul_speed:
   allowed-items:
     - "#boots"
 
-sweeping_edge:
+sweeping_edge: # Java only
   max-level: 3
   allowed-items:
     - "#swords"
