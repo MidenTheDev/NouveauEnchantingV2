@@ -11,7 +11,7 @@
 <div align=center>
   
 ![GitHub Release](https://img.shields.io/github/v/release/MidenTheDev/NouveauEnchantingV2?style=for-the-badge&label=Latest%20Release&color=00B324&link=https%3A%2F%2Fmodrinth.com%2Fplugin%2Fnouveau-enchanting%2Fversions)
-![GitHub Release](https://img.shields.io/github/v/release/MidenTheDev/ServerLevelsV3?style=for-the-badge&label=Latest%20Pre-Release&color=D98300&link=https%3A%2F%2Fmodrinth.com%2Fplugin%2Fnouveau-enchanting%2Fversions)
+![GitHub Release](https://img.shields.io/github/v/release/MidenTheDev/NouveauEnchantingV2?include_prereleases&style=for-the-badge&label=Latest%20Pre-Release&color=E38F27)
 ![Static Badge](https://img.shields.io/badge/Requires%20Version-26.1%2B-GREEN?style=for-the-badge)
 
 </div>
