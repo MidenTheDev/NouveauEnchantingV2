@@ -20,124 +20,82 @@ import us.to.midensthings.nouveauEnchanting.customevents.PlayerEnchantEvent;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchHandler;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantMaterial;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantingGUI;
-
-import java.util.ArrayList;
-import java.util.List;
+import us.to.midensthings.nouveauEnchanting.util.Schedulers;
 
 public class InventoryClick implements Listener {
 
     private final NouveauEnchanting plugin = NouveauEnchanting.getPlugin(NouveauEnchanting.class);
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onClick(InventoryClickEvent event) {
-        //do enchanting stuff
+        Inventory top = event.getView().getTopInventory();
 
         // If gui is NOT the custom enchanting GUI, exit.
-        if (!(event.getInventory().getHolder() instanceof EnchantingGUI eGUI)) {
+        if (!(top.getHolder(false) instanceof EnchantingGUI eGUI) || !(event.getWhoClicked() instanceof Player player)) {
             return;
         }
 
-        // Shift clicks and double clicks move items in and out of the gui without going through the slot checks below
-        if (event.isShiftClick() || event.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
+        // Double clicking gathers matching items from every slot, including the decorations and the result
+        if (event.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
             event.setCancelled(true);
             return;
         }
 
-        Inventory inv = event.getInventory();
-
-        final int materialSlot = eGUI.getMaterialSlot();
-        final int toolSlot = eGUI.getToolSlot();
-        final int resultSlot = eGUI.getResultSlot();
-
-        // Check if the Tool Slot was clicked
-        if (event.getRawSlot() == toolSlot) {
-
-
-            // If player swaps items in tool slot or removes item in slot, clear result (Dupe prevention)
-            if (event.getCurrentItem() != null) {
-                clearResult(inv, resultSlot);
-                eGUI.initializeItems();
-                return;
-            }
-
-            if (inv.getItem(materialSlot) != null) {
-
-                // Right clicking only places one item from the cursor
-                ItemStack placedTool = event.getAction() == InventoryAction.PLACE_ONE ? event.getCursor().asOne() : event.getCursor();
-                tryEnchant(placedTool, inv.getItem(materialSlot), inv, eGUI);
-
-            }
-
-
-        } else if (event.getRawSlot() == materialSlot) {
-
-                // If player swaps items in material slot or removes item in slot, clear result (Dupe prevention)
-                if (event.getCurrentItem() != null) {
-                    clearResult(inv, resultSlot);
-                    eGUI.initializeItems();
-                    return;
-                }
-
-                if (inv.getItem(toolSlot) != null) {
-
-                    tryEnchant(inv.getItem(toolSlot), event.getCursor(), inv, eGUI);
-
-                }
-
-        } else if (event.getRawSlot() == resultSlot) {
-
-                handleResultClick(event, inv, eGUI);
-
-        } else {
-
-                if (event.getRawSlot() < inv.getSize()) {
-                    event.setCancelled(true);
-                }
-
+        Inventory clicked = event.getClickedInventory();
+        if (clicked == null) {
+            return;
         }
 
+        if (clicked != top) {
+            // Shift clicking would put the item in the first open slot, so send it to the tool or material slot instead
+            if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+                event.setCancelled(true);
+                ItemStack item = event.getCurrentItem();
+                if (item != null && !item.isEmpty()) {
+                    event.setCurrentItem(eGUI.insertFromPlayer(item));
+                    eGUI.update();
+                }
+            }
+            return;
+        }
 
+        if (eGUI.isInputSlot(event.getSlot())) {
+            // Let the click happen like a normal inventory, then update the result once the slot has changed
+            Schedulers.runNextTick(player, eGUI::update);
+            return;
+        }
+
+        // Everything else in the gui is controlled by the gui
+        event.setCancelled(true);
+        if (event.getSlot() == eGUI.getResultSlot()) {
+            takeResult(event, player, eGUI);
+        }
     }
 
-    private void handleResultClick(InventoryClickEvent event, Inventory inv, EnchantingGUI eGUI) {
-        final int materialSlot = eGUI.getMaterialSlot();
-        final int toolSlot = eGUI.getToolSlot();
-        final int resultSlot = eGUI.getResultSlot();
-
-        // Only allow taking the result out with an empty cursor.
-        // Swapping or placing would put the player's own item into the result slot.
-        if (event.getCurrentItem() == null || !isTakeAction(event)) {
-            event.setCancelled(true);
-            return;
-        }
-
-        ItemStack toolItem = inv.getItem(toolSlot);
-        ItemStack materialItem = inv.getItem(materialSlot);
+    private void takeResult(InventoryClickEvent event, Player player, EnchantingGUI eGUI) {
+        Inventory inv = eGUI.getInventory();
+        ItemStack toolItem = inv.getItem(eGUI.getToolSlot());
+        ItemStack materialItem = inv.getItem(eGUI.getMaterialSlot());
         EnchHandler eHandler = eGUI.getEnchHandler();
 
-        // Prevent dupes/free enchants by re-checking the recipe against what's actually in the tool and material slots.
+        // Check the recipe against what's actually in the tool and material slots, not what the preview showed.
         if (!eHandler.isValidRecipe(toolItem, materialItem)) {
-            event.setCancelled(true);
-            clearResult(inv, resultSlot);
-            eGUI.initializeItems();
+            eGUI.update();
             return;
         }
 
         int matRequirement = eHandler.getCurrentEnchantMaterialCost();
         int levelRequirement = eHandler.getCurrentEnchantLevelCost();
-        Player player = (Player) event.getWhoClicked();
 
         // You have not enough minerals
         if (materialItem.getAmount() < matRequirement) {
             player.sendMessage(Component.text("You do not have enough materials!").color(TextColor.color(Color.RED.asRGB())));
-            event.setCancelled(true);
             return;
         }
 
         // Not enough levels
         if (player.getLevel() < levelRequirement) {
             player.sendMessage(Component.text("You do not have enough levels!").color(TextColor.color(Color.RED.asRGB())));
-            event.setCancelled(true);
             return;
         }
 
@@ -156,7 +114,6 @@ public class InventoryClick implements Listener {
                         msg = MiniMessage.miniMessage().deserialize(plugin.materialsConf.getString(slReqPath+".low-level-msg").replace("%level%",String.valueOf(playerLevel)));
                     }
                     player.sendMessage(msg);
-                    event.setCancelled(true);
                     return;
                 }
             }
@@ -165,9 +122,12 @@ public class InventoryClick implements Listener {
         // Get the material before it's used up
         EnchantMaterial enchantMaterial = eHandler.getCompatibleEnchantMaterial(materialItem);
 
-        // Take required materials and levels, do not cancel event (let player take item)
-        inv.setItem(toolSlot, ItemStack.empty());
-        materialItem.subtract(matRequirement);
+        if (!giveResult(event, player, eHandler.getAppliedItem(toolItem))) {
+            return;
+        }
+
+        // Take required materials and levels
+        eGUI.consumeInputs(matRequirement);
         player.setLevel(player.getLevel() - levelRequirement);
 
         // Call the player enchant event
@@ -178,62 +138,60 @@ public class InventoryClick implements Listener {
             player.playSound(Sound.sound(Key.key("block.enchantment_table.use"), Sound.Source.UI, 0.5F, 1F), Sound.Emitter.self());
         }
 
-        eGUI.initializeItems();
+        eGUI.update();
     }
 
-    private boolean isTakeAction(InventoryClickEvent event) {
-        if (!event.getCursor().isEmpty()) {
-            return false;
-        }
-        return switch (event.getAction()) {
-            case PICKUP_ALL, PICKUP_HALF, PICKUP_ONE, PICKUP_SOME, DROP_ALL_SLOT, DROP_ONE_SLOT -> true;
-            default -> false;
-        };
-    }
-
-    @EventHandler
-    public void onInventoryDrag(InventoryDragEvent e) {
-        if (e.getInventory().getHolder() instanceof EnchantingGUI) {
-            e.setCancelled(true);
-        }
-    }
-
-    private void clearResult(Inventory inv, int resultSlot) {
-
-        inv.clear(resultSlot);
-
-    }
-
-    private void tryEnchant(ItemStack toolItem, ItemStack materialItem, Inventory inv, EnchantingGUI eGUI) {
-        EnchHandler eHandler = eGUI.getEnchHandler();
-        // If there's no valid enchant (including an empty tool or material), clear result
-        if (!eHandler.isValidRecipe(toolItem, materialItem)) {
-
-            clearResult(inv, eGUI.getResultSlot());
-            eGUI.initializeItems();
-            return;
-        }
-        // else, show the result
-        inv.setItem(eGUI.getResultSlot(), eHandler.getAppliedItem(toolItem));
-
-        // Check if enchant has a ServerLevels Requirement
-        if (plugin.enabledCompats.contains("ServerLevels")) {
-            String slReqPath = eHandler.getSlRequirementsPath();
-            // If there are ServerLevels requirements for this level
-            if (slReqPath != null) {
-                // Requires (system name) level (required level)
-                Component lvlReq = Component.text("Requires "+
-                        plugin.materialsConf.getString(slReqPath+".system-name")+
-                        " level "+
-                        plugin.materialsConf.getInt(slReqPath+".level"),TextColor.color(Color.LIME.asRGB()));
-                List<Component> extraLore = new ArrayList<>();
-                extraLore.add(lvlReq);
-                eGUI.updateCostText(extraLore);
-                return;
+    /***
+     * Puts the enchanted item on the player's cursor, or in their inventory when shift clicking.
+     * @return true if the player received the item.
+     */
+    private boolean giveResult(InventoryClickEvent event, Player player, ItemStack result) {
+        switch (event.getClick()) {
+            case SHIFT_LEFT, SHIFT_RIGHT -> {
+                player.getInventory().addItem(result).values().forEach(leftover ->
+                        player.getWorld().dropItem(player.getLocation(), leftover));
+                return true;
+            }
+            case LEFT, RIGHT -> {
+                ItemStack cursor = event.getView().getCursor();
+                if (cursor.isEmpty()) {
+                    event.getView().setCursor(result);
+                    return true;
+                }
+                if (cursor.isSimilar(result) && cursor.getAmount() + result.getAmount() <= cursor.getMaxStackSize()) {
+                    cursor.setAmount(cursor.getAmount() + result.getAmount());
+                    event.getView().setCursor(cursor);
+                    return true;
+                }
+                return false;
+            }
+            default -> {
+                return false;
             }
         }
+    }
 
-        // Update cost preview
-        eGUI.updateCostText();
+    @EventHandler(ignoreCancelled = true)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        Inventory top = event.getView().getTopInventory();
+        if (!(top.getHolder(false) instanceof EnchantingGUI eGUI)) {
+            return;
+        }
+
+        // Only allow dragging across the tool and material slots (and the player's own inventory)
+        boolean touchesGui = false;
+        for (int rawSlot : event.getRawSlots()) {
+            if (rawSlot >= top.getSize()) {
+                continue;
+            }
+            if (!eGUI.isInputSlot(rawSlot)) {
+                event.setCancelled(true);
+                return;
+            }
+            touchesGui = true;
+        }
+        if (touchesGui && event.getWhoClicked() instanceof Player player) {
+            Schedulers.runNextTick(player, eGUI::update);
+        }
     }
 }

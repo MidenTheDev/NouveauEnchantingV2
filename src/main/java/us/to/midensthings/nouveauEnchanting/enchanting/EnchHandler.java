@@ -41,11 +41,6 @@ public class EnchHandler {
             return false;
         }
 
-        // Only enchant one item at a time, otherwise a whole stack gets enchanted for the price of one
-        if (tool.getAmount() != 1) {
-            return false;
-        }
-
         String materialKey = getMaterialKey(material);
         EnchantMaterial enchMaterial = plugin.materialRegistry.getMaterial(materialKey);
 
@@ -105,12 +100,13 @@ public class EnchHandler {
 
 
     /***
-     Returns a copy of the tool with the enchant found by the last isValidRecipe call applied.
+     Returns a single copy of the tool with the enchant found by the last isValidRecipe call applied.
+     Only one item from a stack is enchanted at a time.
      CHECK IF THE RECIPE IS VALID BEFORE USING THIS METHOD!
      This method assumes the recipe is already valid.
      */
     public ItemStack getAppliedItem(ItemStack tool) {
-        ItemStack result = tool.clone();
+        ItemStack result = tool.asOne();
         result.addEnchantment(currentEnchant, currentEnchantLevel);
         return result;
     }

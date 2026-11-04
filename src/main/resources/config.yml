@@ -12,7 +12,15 @@ check-for-updates: true
 
 gui-info:
   fill-inventory: true
-  # Whether or not to fill the enchanting gui with glass panes
+  # Whether or not to fill the empty slots of the enchanting gui with the filler item
+  fill-inventory-material:
+    material: BLACK_STAINED_GLASS_PANE
+  # Item used to fill the gui. Custom items are supported, e.g.
+  #    material: blank_item
+  #    custom-material:
+  #      source: "itemsadder"
+  #      namespace: "mynamespace"
+
   inventory-name: 'Enchanting Table'
   # Can use FontImages for custom GUI
   tool-slot: 10

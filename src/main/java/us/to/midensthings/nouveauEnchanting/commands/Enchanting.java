@@ -15,6 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import us.to.midensthings.nouveauEnchanting.NouveauEnchanting;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantingGUI;
+import us.to.midensthings.nouveauEnchanting.util.Schedulers;
 
 
 public class Enchanting {
@@ -31,7 +32,7 @@ public class Enchanting {
                 }
 
                 Player player = (Player) sender;
-                player.openInventory(new EnchantingGUI().getInventory());
+                Schedulers.runFor(player, () -> player.openInventory(new EnchantingGUI().getInventory()));
 
                 return Command.SINGLE_SUCCESS;
             }) .then(Commands.argument("player",ArgumentTypes.player()).requires(source -> source.getSender().hasPermission("nouveauenchanting.commands.gui.other")).executes(ctx -> {
@@ -45,7 +46,8 @@ public class Enchanting {
                     return Command.SINGLE_SUCCESS;
                 }
 
-                player.openInventory(new EnchantingGUI().getInventory());
+                // The target can be in another region on Folia, so open it on their thread
+                Schedulers.runFor(player, () -> player.openInventory(new EnchantingGUI().getInventory()));
                 sender.sendMessage(Component.text("Opened enchanting window for "+player.getName()).color(TextColor.color(Color.LIME.asRGB())));
                 return Command.SINGLE_SUCCESS;
 

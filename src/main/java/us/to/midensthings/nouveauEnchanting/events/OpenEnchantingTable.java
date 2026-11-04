@@ -5,12 +5,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
-import us.to.midensthings.nouveauEnchanting.NouveauEnchanting;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantingGUI;
+import us.to.midensthings.nouveauEnchanting.util.Schedulers;
 
 public class OpenEnchantingTable implements Listener {
-
-    private final NouveauEnchanting plugin = NouveauEnchanting.getPlugin(NouveauEnchanting.class);
 
     @EventHandler
     public void onEnchantingOpen(InventoryOpenEvent event) {
@@ -19,7 +17,7 @@ public class OpenEnchantingTable implements Listener {
             // close inv
             event.setCancelled(true);
             // open custom one for player on the next tick, opening an inventory inside the open event isn't reliable
-            player.getScheduler().run(plugin, task -> player.openInventory(new EnchantingGUI().getInventory()), null);
+            Schedulers.runNextTick(player, () -> player.openInventory(new EnchantingGUI().getInventory()));
 
         }
 
