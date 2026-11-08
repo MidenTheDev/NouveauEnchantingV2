@@ -5,18 +5,25 @@ import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import io.papermc.paper.plugin.bootstrap.PluginProviderContext;
 import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.registry.TypedKey;
+import io.papermc.paper.registry.data.EnchantmentRegistryEntry;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.registry.event.RegistryEvents;
-import io.papermc.paper.registry.set.RegistryKeySet;
-import io.papermc.paper.registry.set.RegistrySet;
+import io.papermc.paper.registry.tag.TagKey;
+import io.papermc.paper.tag.PreFlattenTagRegistrar;
+import io.papermc.paper.tag.TagEntry;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.slf4j.LoggerFactory;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantMaterial;
 import us.to.midensthings.nouveauEnchanting.enchanting.MaterialRegistry;
+import us.to.midensthings.nouveauEnchanting.util.LegacyTagsMigrator;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,19 +31,23 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class NouveauEnchantingBootstrapper implements PluginBootstrap {
+    // Namespace for the tags this plugin creates
+    private static final String TAG_NAMESPACE = "nouveauenchanting";
+
     MaterialRegistry materialRegistry;
     YamlConfiguration materialsConf;
     YamlConfiguration enchantsConf;
-    YamlConfiguration tagsConf;
     Path dataDirectory;
     ComponentLogger logger;
     File materialsYml;
     File enchantsYml;
-    File tagsYml;
+
+    // Tags to create, filled in from the configs and registered when the server loads tags
+    private final Map<TagKey<ItemType>, List<TagEntry<ItemType>>> itemTags = new LinkedHashMap<>();
+    private final Map<TagKey<Enchantment>, List<TagEntry<Enchantment>>> enchantmentTags = new LinkedHashMap<>();
 
 
 
@@ -46,15 +57,15 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
         dataDirectory = context.getDataDirectory();
         materialsYml = dataDirectory.resolve("materials.yml").toFile();
         enchantsYml = dataDirectory.resolve("enchants.yml").toFile();
-        tagsYml = dataDirectory.resolve("tags.yml").toFile();
 
         generateFile(materialsYml, "materials.yml");
         generateFile(enchantsYml, "enchants.yml");
-        generateFile(tagsYml, "tags.yml");
+
+        // Convert enchants.yml from the old tags.yml system if it's still there
+        LegacyTagsMigrator.migrate(dataDirectory, enchantsYml, logger);
 
         materialsConf = YamlConfiguration.loadConfiguration(materialsYml);
         enchantsConf = YamlConfiguration.loadConfiguration(enchantsYml);
-        tagsConf = YamlConfiguration.loadConfiguration(tagsYml);
 
 
         // Fill in material registry
@@ -118,7 +129,7 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
         });
 
 
-        // Modify vanilla enchants according to enchants.yml
+        // Modify vanilla enchants according to enchants.yml. Every setting is optional, anything left out keeps its default value.
         enchantsConf.getConfigurationSection("").getKeys(false).forEach(enchant -> {
 
             NamespacedKey enchantKey = NamespacedKey.fromString(enchant);
@@ -127,37 +138,66 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
                 return;
             }
 
-            int maxLevel = enchantsConf.getInt(enchant+".max-level");
-            if (maxLevel < 1) {
-                logger.warn("Enchant " + enchant + " in enchants.yml needs a max-level of at least 1, skipping");
-                return;
-            }
+            // Read out configurable enchants.yml options
+            final Optional<Integer> maxLevel = readInt(enchant, "max-level", 1, 255);
+            final Optional<Integer> anvilCost = readInt(enchant, "anvil-cost", 0, Integer.MAX_VALUE);
+            final Optional<Integer> weight = readInt(enchant, "weight", 1, 1024);
+            final Optional<Integer> minCostBase = readInt(enchant, "min-cost.base", Integer.MIN_VALUE, Integer.MAX_VALUE);
+            final Optional<Integer> minCostPerLevel = readInt(enchant, "min-cost.per-level", Integer.MIN_VALUE, Integer.MAX_VALUE);
+            final Optional<Integer> maxCostBase = readInt(enchant, "max-cost.base", Integer.MIN_VALUE, Integer.MAX_VALUE);
+            final Optional<Integer> maxCostPerLevel = readInt(enchant, "max-cost.per-level", Integer.MIN_VALUE, Integer.MAX_VALUE);
 
-            RegistryKeySet<ItemType> allowedItems = createItemKeySet(tagsConf,enchantsConf.getStringList(enchant+".allowed-items"));
+            final Optional<Component> description =
+                    enchantsConf.isSet(enchant + ".description") ? Optional.of(MiniMessage.miniMessage().deserialize(enchantsConf.getString(enchant + ".description", ""))) : Optional.empty();
 
-            if (allowedItems.isEmpty()) {
-                logger.warn("Could not generate valid item list for enchant " + enchant);
-            }
+            final Optional<List<EquipmentSlotGroup>> activeSlots = readActiveSlots(enchant);
+
+            // Item and enchant lists become tags made by this plugin, the same way vanilla uses the enchantable and exclusive_set tags
+            final Optional<TagKey<ItemType>> supportedItemsTag =
+                    createTag(itemTags, RegistryKey.ITEM, enchant, "allowed-items", "supported/" + enchantKey.getKey());
+            final Optional<TagKey<ItemType>> primaryItemsTag =
+                    createTag(itemTags, RegistryKey.ITEM, enchant, "primary-items", "primary/" + enchantKey.getKey());
+            final Optional<TagKey<Enchantment>> conflictsTag =
+                    createTag(enchantmentTags, RegistryKey.ENCHANTMENT, enchant, "conflicts-with", "exclusive/" + enchantKey.getKey());
 
             context.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.entryAdd()
-                    .newHandler(event -> event.builder()
-                            // Set Max Level
-                            .maxLevel(maxLevel)
-                            // Set supported items
-                            .supportedItems(allowedItems)
+                    .newHandler(event -> {
+                        EnchantmentRegistryEntry.Builder builder = event.builder();
 
-                            // TODO Set enchantment conflicts
-                            // TODO Set Primary/Secondary enchants
-                            // TODO Set Anvil Cost
-                            // TODO Set Description
-                            // TODO Set Min Cost
-                            // TODO Set Max Cost
-                            // TODO Set Weight
-                            // TODO Set Active Slots
+                        // set max level
+                        maxLevel.ifPresent(builder::maxLevel);
 
+                        // set anvil cost
+                        anvilCost.ifPresent(builder::anvilCost);
 
-                    )
+                        // set description
+                        description.ifPresent(builder::description);
 
+                        // set weight
+                        weight.ifPresent(builder::weight);
+
+                        // set min and max cost, keeping the default for whichever half isn't set
+                        if (minCostBase.isPresent() || minCostPerLevel.isPresent()) {
+                            builder.minimumCost(EnchantmentRegistryEntry.EnchantmentCost.of(
+                                    minCostBase.orElse(builder.minimumCost().baseCost()),
+                                    minCostPerLevel.orElse(builder.minimumCost().additionalPerLevelCost())));
+                        }
+                        if (maxCostBase.isPresent() || maxCostPerLevel.isPresent()) {
+                            builder.maximumCost(EnchantmentRegistryEntry.EnchantmentCost.of(
+                                    maxCostBase.orElse(builder.maximumCost().baseCost()),
+                                    maxCostPerLevel.orElse(builder.maximumCost().additionalPerLevelCost())));
+                        }
+
+                        // set active slots
+                        activeSlots.ifPresent(slots -> builder.activeSlots(slots));
+
+                        // set supported and primary items
+                        supportedItemsTag.ifPresent(tag -> builder.supportedItems(event.getOrCreateTag(tag)));
+                        primaryItemsTag.ifPresent(tag -> builder.primaryItems(event.getOrCreateTag(tag)));
+
+                        // set enchantment conflicts
+                        conflictsTag.ifPresent(tag -> builder.exclusiveWith(event.getOrCreateTag(tag)));
+                    })
 
                     // Filter for this specific enchant
                     .filter(RegistryKey.ENCHANTMENT.typedKey(enchantKey))
@@ -166,13 +206,17 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
         });
 
 
+        // Create the tags used by the enchants. This runs again whenever datapacks are reloaded.
+        registerTags(context, RegistryKey.ITEM, itemTags);
+        registerTags(context, RegistryKey.ENCHANTMENT, enchantmentTags);
+
         // TODO: Add Custom Enchantments to Registry
 
     }
 
     @Override
     public JavaPlugin createPlugin(PluginProviderContext context) {
-        return new NouveauEnchanting(materialRegistry,materialsConf,enchantsConf,tagsConf);
+        return new NouveauEnchanting(materialRegistry,materialsConf,enchantsConf);
         //return new NouveauEnchanting();
     }
 
@@ -201,46 +245,114 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
 
     }
 
-    public  RegistryKeySet<ItemType> createItemKeySet(YamlConfiguration tagsConf, List<String> rawInputs) {
-        List<TypedKey<ItemType>> resolvedKeys = new ArrayList<>();
+    /***
+     * Reads an optional whole number setting for an enchant.
+     * @return the value, or empty if it isn't set or isn't valid (with a warning), so the default is used.
+     */
+    private Optional<Integer> readInt(String enchant, String field, int min, int max) {
+        String path = enchant + "." + field;
+        if (!enchantsConf.isSet(path)) {
+            return Optional.empty();
+        }
+        int value = enchantsConf.getInt(path);
+        if (!enchantsConf.isInt(path) || value < min || value > max) {
+            String range = "";
+            if (max == Integer.MAX_VALUE && min != Integer.MIN_VALUE) {
+                range = " of at least " + min;
+            } else if (max != Integer.MAX_VALUE) {
+                range = " from " + min + " to " + max;
+            }
+            logger.warn(field + " for enchant " + enchant + " in enchants.yml must be a whole number" + range + ", using the default instead");
+            return Optional.empty();
+        }
+        return Optional.of(value);
+    }
+
+    /***
+     * Reads the optional list of equipment slots the enchant works in.
+     * @return the slots, or empty if the setting isn't set so the default is used.
+     */
+    private Optional<List<EquipmentSlotGroup>> readActiveSlots(String enchant) {
+        String path = enchant + ".active-slots";
+        if (!enchantsConf.isSet(path)) {
+            return Optional.empty();
+        }
+        List<EquipmentSlotGroup> slots = new ArrayList<>();
+        for (String name : enchantsConf.getStringList(path)) {
+            EquipmentSlotGroup slot = EquipmentSlotGroup.getByName(name.toLowerCase());
+            if (slot == null) {
+                logger.warn("Unknown active slot " + name + " for enchant " + enchant + " in enchants.yml, skipping");
+                continue;
+            }
+            slots.add(slot);
+        }
+        return Optional.of(slots);
+    }
+
+    /***
+     * Turns a list setting for an enchant into a tag made by this plugin, which gets registered when the server loads tags.
+     * @return the tag, or empty if the setting isn't set so the default is used.
+     */
+    private <T> Optional<TagKey<T>> createTag(Map<TagKey<T>, List<TagEntry<T>>> tags, RegistryKey<T> registryKey, String enchant, String field, String tagName) {
+        String path = enchant + "." + field;
+        if (!enchantsConf.isSet(path)) {
+            return Optional.empty();
+        }
+        List<TagEntry<T>> entries = parseEntries(registryKey, enchantsConf.getStringList(path), field);
+        if (entries.isEmpty()) {
+            logger.warn(field + " for enchant " + enchant + " in enchants.yml is empty");
+        }
+        TagKey<T> tagKey = TagKey.create(registryKey, new NamespacedKey(TAG_NAMESPACE, tagName));
+        tags.put(tagKey, entries);
+        return Optional.of(tagKey);
+    }
+
+    /***
+     * Turns a list of entries and tags from the configs into tag entries.
+     * Tags start with # (e.g. "#swords" or "#minecraft:enchantable/armor"), anything else is a single entry (e.g. "mace").
+     * Both default to the minecraft namespace.
+     */
+    private <T> List<TagEntry<T>> parseEntries(RegistryKey<T> registryKey, List<String> rawInputs, String field) {
+        List<TagEntry<T>> entries = new ArrayList<>();
 
         for (String input : rawInputs) {
             if (input == null || input.isBlank()) continue;
 
             String inputString = input.toLowerCase();
-
-            // Handle Tags (e.g., "#swords" or "#minecraft:swords")
-            if (inputString.startsWith("#")) {
-                inputString = inputString.substring(1);
-
-                // Check if the tag exists
-
-                if (tagsConf.getStringList(inputString).isEmpty()) {
-                    logger.warn("Unknown or empty tag #" + inputString + " in enchants.yml");
-                    continue;
-                }
-
-                // Get all the itemtypes associated with the tag and add it to our key list.
-                tagsConf.getStringList(inputString).forEach(item -> addItemKey(resolvedKeys, item.toLowerCase()));
-
+            boolean isTag = inputString.startsWith("#");
+            NamespacedKey key = NamespacedKey.fromString(isTag ? inputString.substring(1) : inputString);
+            if (key == null) {
+                logger.warn("Invalid entry " + input + " in " + field + " in enchants.yml, skipping");
+                continue;
             }
-            // Handle Direct Item Names (e.g., "diamond_sword")
-            else {
-                addItemKey(resolvedKeys, inputString);
+
+            // Entries aren't required, so a missing entry or tag can't stop the server from loading tags
+            if (isTag) {
+                entries.add(TagEntry.tagEntry(TagKey.create(registryKey, key), false));
+            } else if (registryKey == RegistryKey.ITEM && key.getNamespace().equals(NamespacedKey.MINECRAFT) && Material.getMaterial(key.getKey().toUpperCase()) == null) {
+                // Only vanilla items can be checked here
+                logger.warn("Unknown item " + input + " in " + field + " in enchants.yml, skipping");
+            } else {
+                entries.add(TagEntry.valueEntry(TypedKey.create(registryKey, key), false));
             }
         }
-        // Return registry key set from the resolved keys item list
-        return RegistrySet.keySet(RegistryKey.ITEM, resolvedKeys);
+        return entries;
     }
 
-    private void addItemKey(List<TypedKey<ItemType>> resolvedKeys, String item) {
-        // Defaults to "minecraft" namespace if omitted
-        NamespacedKey itemKey = NamespacedKey.fromString(item);
-        // Unknown items would break the registry, so skip them. Only vanilla items can be checked here.
-        if (itemKey == null || (itemKey.getNamespace().equals(NamespacedKey.MINECRAFT) && Material.getMaterial(itemKey.getKey().toUpperCase()) == null)) {
-            logger.warn("Unknown item " + item + " in enchants.yml or tags.yml, skipping");
-            return;
-        }
-        resolvedKeys.add(TypedKey.create(RegistryKey.ITEM, itemKey));
+    /***
+     * Registers the tags made from the configs. Runs whenever the server loads tags, including datapack reloads.
+     */
+    private <T> void registerTags(BootstrapContext context, RegistryKey<T> registryKey, Map<TagKey<T>, List<TagEntry<T>>> tags) {
+        context.getLifecycleManager().registerEventHandler(LifecycleEvents.TAGS.preFlatten(registryKey), event -> {
+            PreFlattenTagRegistrar<T> registrar = event.registrar();
+            tags.forEach((tagKey, entries) -> {
+                for (TagEntry<T> entry : entries) {
+                    if (entry.isTag() && !registrar.hasTag(TagKey.create(registryKey, entry.key()))) {
+                        logger.warn("Unknown tag #" + entry.key().asString() + " used by " + tagKey.key().asString());
+                    }
+                }
+                registrar.setTag(tagKey, entries);
+            });
+        });
     }
 }

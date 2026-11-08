@@ -26,7 +26,6 @@ public final class NouveauEnchanting extends JavaPlugin {
 
     public YamlConfiguration materialsConf;
     public YamlConfiguration enchantsConf;
-    public YamlConfiguration tagsConf;
 
     Logger logger = this.getLogger();
     public MaterialRegistry materialRegistry;
@@ -35,11 +34,10 @@ public final class NouveauEnchanting extends JavaPlugin {
     private UpdateTracker updateTracker;
 
 
-    public NouveauEnchanting(MaterialRegistry bootstrapRegistry, YamlConfiguration bootMaterialsConf, YamlConfiguration bootEnchantsConf, YamlConfiguration bootTagsConf) {
+    public NouveauEnchanting(MaterialRegistry bootstrapRegistry, YamlConfiguration bootMaterialsConf, YamlConfiguration bootEnchantsConf) {
         materialRegistry = bootstrapRegistry;
         materialsConf = bootMaterialsConf;
         enchantsConf = bootEnchantsConf;
-        tagsConf = bootTagsConf;
     }
 
 

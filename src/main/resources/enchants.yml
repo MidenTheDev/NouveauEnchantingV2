@@ -1,20 +1,77 @@
+# Every setting is optional. Leave one out (or delete the line) to keep the enchant's vanilla or datapack value.
+# See bane_of_arthropods below for an example of every setting.
+#
+# allowed-items and primary-items can list items (e.g. "mace") and item tags starting with # (e.g. "#swords").
+# Any vanilla or datapack item tag works, see https://minecraft.wiki/w/Item_tag_(Java_Edition)
+# Items, enchants and tags without a namespace default to minecraft.
+
 aqua_affinity:
   max-level: 1
   allowed-items:
-    - "#helmets"
+    - "#head_armor"
 
+# Bane of Arthropods lists every available setting as an example, set to the vanilla values.
 bane_of_arthropods:
+  # Highest level the enchant can reach, from 1 to 255.
   max-level: 5
+
+  # Name of the enchant shown on items, in MiniMessage format. The level (e.g. "V") is added after it automatically.
+  # Leave it out to keep the vanilla name, which is translated into each player's language.
+  # Plain text works, e.g. "<gray>Bane of Arthropods", but <lang:key> shows a translation in each player's language.
+  # Custom translation keys need a resource pack that adds them. Use <lang_or:key:'Fallback text'> to show
+  # the fallback text to players who don't have the translation, e.g. "<lang_or:myserver.enchant.bane:'Bane of Arthropods'>"
+  description: "<lang:enchantment.minecraft.bane_of_arthropods>"
+
+  # Items the enchant can be put on, through this plugin's enchanting gui, anvils and commands.
   allowed-items:
     - "#swords"
     - "#axes"
     - "#spears"
     - "mace"
 
+  # Items the enchant can show up on from the vanilla enchanting table and random enchanting (loot, mob gear, etc).
+  # Should only contain items that are also in allowed-items. Enchants without primary-items use allowed-items instead.
+  primary-items:
+    - "#swords"
+
+  # Enchants this one can't be on the same item with. Enchant tags work too, e.g. "#exclusive_set/damage".
+  # Conflicts work both ways, so an enchant listed here also can't be added to items that already have this one.
+  conflicts-with:
+    - "sharpness"
+    - "smite"
+    - "impaling"
+    - "breach"
+    - "density"
+
+  # How expensive the enchant is to combine in an anvil. The anvil multiplies this by the level, and halves it for books.
+  anvil-cost: 2
+
+  # How likely the enchant is to be picked in random enchanting, from 1 to 1024. Higher is more common.
+  # Vanilla uses 10 for common, 5 for uncommon, 2 for rare and 1 for very rare enchants.
+  weight: 5
+
+  # The range of enchanting levels each level of the enchant can be picked at in random enchanting.
+  # A level's cost is: base + per-level * (level - 1). With these values, level I is 5-25, level II is 13-33, and so on.
+  # You can set just base or just per-level, the other keeps its default.
+  min-cost:
+    base: 5
+    per-level: 8
+  max-cost:
+    base: 25
+    per-level: 8
+
+  # Equipment slots the item has to be in for the enchant to have an effect.
+  # Options: any, mainhand, offhand, hand, head, chest, legs, feet, armor, body, saddle
+  active-slots:
+    - mainhand
+
 blast_protection:
   max-level: 4
   allowed-items:
-    - "#armor"
+    - "#head_armor"
+    - "#chest_armor"
+    - "#leg_armor"
+    - "#foot_armor"
 
 breach:
   max-level: 4
@@ -29,15 +86,21 @@ channeling:
 binding_curse:
   max-level: 1
   allowed-items:
-    - "#armor"
-    - "#heads"
+    - "#head_armor"
+    - "#chest_armor"
+    - "#leg_armor"
+    - "#foot_armor"
+    - "#skulls"
     - "elytra"
     - "carved_pumpkin"
 
 vanishing_curse:
   max-level: 1
   allowed-items:
-    - "#armor"
+    - "#head_armor"
+    - "#chest_armor"
+    - "#leg_armor"
+    - "#foot_armor"
     - "#pickaxes"
     - "#axes"
     - "#hoes"
@@ -55,7 +118,7 @@ vanishing_curse:
     - "shield"
     - "elytra"
     - "carved_pumpkin"
-    - "#heads"
+    - "#skulls"
     - "trident"
     - "crossbow"
     - "brush"
@@ -69,7 +132,7 @@ density:
 depth_strider:
   max-level: 3
   allowed-items:
-    - "#boots"
+    - "#foot_armor"
 
 efficiency:
   max-level: 5
@@ -83,7 +146,7 @@ efficiency:
 feather_falling:
   max-level: 4
   allowed-items:
-    - "#boots"
+    - "#foot_armor"
 
 
 fire_aspect:
@@ -96,7 +159,10 @@ fire_aspect:
 fire_protection:
   max-level: 4
   allowed-items:
-    - "#armor"
+    - "#head_armor"
+    - "#chest_armor"
+    - "#leg_armor"
+    - "#foot_armor"
 
 
 flame:
@@ -116,7 +182,7 @@ fortune:
 frost_walker:
   max-level: 2
   allowed-items:
-    - "#boots"
+    - "#foot_armor"
 
 impaling:
   max-level: 5
@@ -163,7 +229,10 @@ lure:
 mending:
   max-level: 1
   allowed-items:
-    - "#armor"
+    - "#head_armor"
+    - "#chest_armor"
+    - "#leg_armor"
+    - "#foot_armor"
     - "#pickaxes"
     - "#axes"
     - "#hoes"
@@ -201,12 +270,18 @@ power:
 projectile_protection:
   max-level: 4
   allowed-items:
-    - "#armor"
+    - "#head_armor"
+    - "#chest_armor"
+    - "#leg_armor"
+    - "#foot_armor"
 
 protection:
   max-level: 4
   allowed-items:
-    - "#armor"
+    - "#head_armor"
+    - "#chest_armor"
+    - "#leg_armor"
+    - "#foot_armor"
 
 punch:
   max-level: 2
@@ -221,7 +296,7 @@ quick_charge:
 respiration:
   max-level: 3
   allowed-items:
-    - "#helmets"
+    - "#head_armor"
 
 riptide:
   max-level: 3
@@ -256,7 +331,7 @@ smite:
 soul_speed:
   max-level: 3
   allowed-items:
-    - "#boots"
+    - "#foot_armor"
 
 sweeping_edge: # Java only
   max-level: 3
@@ -266,17 +341,23 @@ sweeping_edge: # Java only
 swift_sneak:
   max-level: 3
   allowed-items:
-    - "#leggings"
+    - "#leg_armor"
 
 thorns:
   max-level: 3
   allowed-items:
-    - "#armor"
+    - "#head_armor"
+    - "#chest_armor"
+    - "#leg_armor"
+    - "#foot_armor"
 
 unbreaking:
   max-level: 3
   allowed-items:
-    - "#armor"
+    - "#head_armor"
+    - "#chest_armor"
+    - "#leg_armor"
+    - "#foot_armor"
     - "#pickaxes"
     - "#axes"
     - "#hoes"
