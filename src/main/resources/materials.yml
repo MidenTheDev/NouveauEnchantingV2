@@ -489,4 +489,11 @@ blue_ice:
     2:
       level-cost: 10
       material-cost: 8
-
+# Material cost for built-in custom enchant ice aspect
+  nouveauenchanting:ice_aspect:
+    1:
+      level-cost: 6
+      material-cost: 8
+    2:
+      level-cost: 10
+      material-cost: 8

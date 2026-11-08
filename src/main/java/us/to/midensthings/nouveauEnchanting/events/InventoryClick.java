@@ -87,15 +87,7 @@ public class InventoryClick implements Listener {
         int matRequirement = eHandler.getCurrentEnchantMaterialCost();
         int levelRequirement = eHandler.getCurrentEnchantLevelCost();
 
-        // You have not enough minerals
-        if (materialItem.getAmount() < matRequirement) {
-            player.sendMessage(Component.text("You do not have enough materials!").color(TextColor.color(Color.RED.asRGB())));
-            return;
-        }
-
-        // Not enough levels
-        if (player.getLevel() < levelRequirement) {
-            player.sendMessage(Component.text("You do not have enough levels!").color(TextColor.color(Color.RED.asRGB())));
+        if (!canAfford(player, materialItem, matRequirement, levelRequirement)) {
             return;
         }
 
@@ -119,20 +111,36 @@ public class InventoryClick implements Listener {
             }
         }
 
+        // Make sure the player can take the item before calling the event, so it isn't called for enchanting that can't happen
+        ItemStack result = eHandler.getAppliedItem(toolItem);
+        if (!canGiveResult(event, result)) {
+            return;
+        }
+
         // Get the material before it's used up
         EnchantMaterial enchantMaterial = eHandler.getCompatibleEnchantMaterial(materialItem);
 
-        if (!giveResult(event, player, eHandler.getAppliedItem(toolItem))) {
+        // Call the player enchant event, which can change the result and costs or cancel the enchanting
+        PlayerEnchantEvent playerEnchantEvent = new PlayerEnchantEvent(player,eHandler.getLastEnchant(),enchantMaterial,matRequirement,levelRequirement,
+                eHandler.getCurrentEnchantLevel(), toolItem.asOne(), result);
+        if (!playerEnchantEvent.callEvent()) {
+            return;
+        }
+
+        // Listeners can change the costs, so check them again
+        matRequirement = playerEnchantEvent.getMaterialCost();
+        levelRequirement = playerEnchantEvent.getExpCost();
+        if (!canAfford(player, materialItem, matRequirement, levelRequirement)) {
+            return;
+        }
+
+        if (!giveResult(event, player, playerEnchantEvent.getResult())) {
             return;
         }
 
         // Take required materials and levels
         eGUI.consumeInputs(matRequirement);
         player.setLevel(player.getLevel() - levelRequirement);
-
-        // Call the player enchant event
-        PlayerEnchantEvent playerEnchantEvent = new PlayerEnchantEvent(player,eHandler.getLastEnchant(),enchantMaterial,matRequirement,levelRequirement,eHandler.getCurrentEnchantLevel());
-        playerEnchantEvent.callEvent();
 
         if (plugin.getConfig().getBoolean("play-sound-on-enchant")) {
             player.playSound(Sound.sound(Key.key("block.enchantment_table.use"), Sound.Source.UI, 0.5F, 1F), Sound.Emitter.self());
@@ -142,33 +150,59 @@ public class InventoryClick implements Listener {
     }
 
     /***
+     * Checks the player has enough materials and levels, telling them if they don't.
+     */
+    private boolean canAfford(Player player, ItemStack materialItem, int materialCost, int levelCost) {
+        // You have not enough minerals
+        if (materialItem.getAmount() < materialCost) {
+            player.sendMessage(Component.text("You do not have enough materials!").color(TextColor.color(Color.RED.asRGB())));
+            return false;
+        }
+
+        // Not enough levels
+        if (player.getLevel() < levelCost) {
+            player.sendMessage(Component.text("You do not have enough levels!").color(TextColor.color(Color.RED.asRGB())));
+            return false;
+        }
+        return true;
+    }
+
+    /***
+     * @return true if the click can give the player the enchanted item: shift clicking, or clicking with an empty cursor
+     * or a cursor the item stacks onto.
+     */
+    private boolean canGiveResult(InventoryClickEvent event, ItemStack result) {
+        return switch (event.getClick()) {
+            case SHIFT_LEFT, SHIFT_RIGHT -> true;
+            case LEFT, RIGHT -> {
+                ItemStack cursor = event.getView().getCursor();
+                yield cursor.isEmpty() || (cursor.isSimilar(result) && cursor.getAmount() + result.getAmount() <= cursor.getMaxStackSize());
+            }
+            default -> false;
+        };
+    }
+
+    /***
      * Puts the enchanted item on the player's cursor, or in their inventory when shift clicking.
      * @return true if the player received the item.
      */
     private boolean giveResult(InventoryClickEvent event, Player player, ItemStack result) {
-        switch (event.getClick()) {
-            case SHIFT_LEFT, SHIFT_RIGHT -> {
-                player.getInventory().addItem(result).values().forEach(leftover ->
-                        player.getWorld().dropItem(player.getLocation(), leftover));
-                return true;
-            }
-            case LEFT, RIGHT -> {
-                ItemStack cursor = event.getView().getCursor();
-                if (cursor.isEmpty()) {
-                    event.getView().setCursor(result);
-                    return true;
-                }
-                if (cursor.isSimilar(result) && cursor.getAmount() + result.getAmount() <= cursor.getMaxStackSize()) {
-                    cursor.setAmount(cursor.getAmount() + result.getAmount());
-                    event.getView().setCursor(cursor);
-                    return true;
-                }
-                return false;
-            }
-            default -> {
-                return false;
-            }
+        if (!canGiveResult(event, result)) {
+            return false;
         }
+        if (event.isShiftClick()) {
+            player.getInventory().addItem(result).values().forEach(leftover ->
+                    player.getWorld().dropItem(player.getLocation(), leftover));
+            return true;
+        }
+        ItemStack cursor = event.getView().getCursor();
+        if (cursor.isEmpty()) {
+            event.getView().setCursor(result);
+        } else {
+            cursor.setAmount(cursor.getAmount() + result.getAmount());
+            event.getView().setCursor(cursor);
+        }
+        return true;
     }
 
     @EventHandler(ignoreCancelled = true)

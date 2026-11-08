@@ -1,15 +1,23 @@
 package us.to.midensthings.nouveauEnchanting;
 
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.*;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import us.to.midensthings.nouveauEnchanting.addons.AddonLoader;
+import us.to.midensthings.nouveauEnchanting.addons.CustomEnchantment;
+import us.to.midensthings.nouveauEnchanting.addons.CustomEnchantmentRegistry;
 import us.to.midensthings.nouveauEnchanting.commands.Debug;
 import us.to.midensthings.nouveauEnchanting.commands.Enchanting;
 import us.to.midensthings.nouveauEnchanting.enchanting.MaterialRegistry;
+import us.to.midensthings.nouveauEnchanting.events.EnchantEventBridge;
 import us.to.midensthings.nouveauEnchanting.events.InventoryClick;
 import us.to.midensthings.nouveauEnchanting.events.InventoryClose;
 import us.to.midensthings.nouveauEnchanting.events.OpenEnchantingTable;
@@ -33,11 +41,17 @@ public final class NouveauEnchanting extends JavaPlugin {
     public List<String> enabledCompats;
     private UpdateTracker updateTracker;
 
+    private final CustomEnchantmentRegistry customEnchantments;
+    private final AddonLoader addonLoader;
 
-    public NouveauEnchanting(MaterialRegistry bootstrapRegistry, YamlConfiguration bootMaterialsConf, YamlConfiguration bootEnchantsConf) {
+
+    public NouveauEnchanting(MaterialRegistry bootstrapRegistry, YamlConfiguration bootMaterialsConf, YamlConfiguration bootEnchantsConf,
+                             CustomEnchantmentRegistry bootCustomEnchantments, AddonLoader bootAddonLoader) {
         materialRegistry = bootstrapRegistry;
         materialsConf = bootMaterialsConf;
         enchantsConf = bootEnchantsConf;
+        customEnchantments = bootCustomEnchantments;
+        addonLoader = bootAddonLoader;
     }
 
 
@@ -51,6 +65,11 @@ public final class NouveauEnchanting extends JavaPlugin {
         registerEvents();
         registerCommands();
 
+        // Addons are loaded while bootstrapping, but can only use other plugins once they're enabled
+        addonLoader.enableAddons(this);
+
+        warnUnknownEnchants();
+
         if (getConfig().getBoolean("check-for-updates")) {
             this.updateTracker = new UpdateTracker();
             updateTracker.checkForUpdates();
@@ -60,7 +79,7 @@ public final class NouveauEnchanting extends JavaPlugin {
     @Override
     public void onDisable() {
         logger.info("Disabling Nouveau Enchanting");
-        // Plugin shutdown logic
+        addonLoader.disableAddons();
     }
 
 
@@ -70,6 +89,16 @@ public final class NouveauEnchanting extends JavaPlugin {
         }
         pm.registerEvents(new InventoryClick(), this);
         pm.registerEvents(new InventoryClose(), this);
+        // Calls ItemEnchantEvent and ItemDisenchantEvent for vanilla enchanting tables, anvils and grindstones
+        pm.registerEvents(new EnchantEventBridge(), this);
+
+        // Addon enchants are registered when their addon enables
+        for (CustomEnchantment enchantment : customEnchantments.getAll()) {
+            if (enchantment instanceof Listener listener
+                    && NouveauEnchantingBootstrapper.BUILTIN_SOURCE.equals(customEnchantments.getSource(enchantment.getKey()))) {
+                pm.registerEvents(listener, this);
+            }
+        }
     }
 
     public void registerCommands() {
@@ -111,6 +140,34 @@ public final class NouveauEnchanting extends JavaPlugin {
             logger.warning("config.yml has config-version " + config.getString("config-version") + " but this version of the plugin expects " + defaults.getString("config-version") + ". Missing options will use their defaults.");
         }
 
+    }
+
+    /***
+     * Warns about enchants in enchants.yml that don't exist, e.g. typos or enchants from addons and datapacks that were removed.
+     * Their settings can't be applied to anything, so they're ignored.
+     * The enchant registry is complete by now, so this also sees enchants added by datapacks.
+     */
+    private void warnUnknownEnchants() {
+        Registry<Enchantment> enchantmentRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT);
+        for (String enchant : enchantsConf.getKeys(false)) {
+            NamespacedKey key = NamespacedKey.fromString(enchant);
+            // Invalid keys were already warned about while bootstrapping, and custom enchants are always known
+            if (key == null || customEnchantments.contains(key)) {
+                continue;
+            }
+            if (enchantmentRegistry.get(key) == null) {
+                logger.warning("enchants.yml has settings for " + enchant + ", but there's no enchant with that key, so they're ignored. "
+                        + "If it's from an addon or datapack that was removed, its section can be deleted.");
+            }
+        }
+    }
+
+    public CustomEnchantmentRegistry getCustomEnchantments() {
+        return customEnchantments;
+    }
+
+    public AddonLoader getAddonLoader() {
+        return addonLoader;
     }
 
     public UpdateTracker getUpdateTracker() {
