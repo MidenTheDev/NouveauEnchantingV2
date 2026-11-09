@@ -2,10 +2,10 @@ name: Publish to Maven repository
 
 on:
   push:
-    tags: ['v*']   # runs when you push a tag like v1.2.0
+    tags: ['*']   # runs when you push a version tag, e.g. 1.2.0 (it must match the version in pom.xml)
 
 permissions:
-  contents: read
+  contents: write   # lets the workflow create the GitHub release
 
 jobs:
   publish:
@@ -32,7 +32,7 @@ jobs:
       - name: Check the tag matches the pom.xml version
         run: |
           VERSION=$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout)
-          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+          if [ "$VERSION" != "$GITHUB_REF_NAME" ]; then
             echo "::error::Tag $GITHUB_REF_NAME doesn't match the pom.xml version $VERSION"
             exit 1
           fi
@@ -56,3 +56,17 @@ jobs:
           git add .
           git commit -m "Publish NouveauEnchanting $VERSION"
           git push
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Snapshots, release candidates, alphas and betas are marked as pre-releases
+          PRERELEASE=""
+          if echo "$VERSION" | grep -qiE 'snapshot|rc|alpha|beta'; then
+            PRERELEASE="--prerelease"
+          fi
+          gh release create "$GITHUB_REF_NAME" "target/NouveauEnchanting-$VERSION.jar" \
+            --title "Nouveau Enchanting $VERSION" \
+            --generate-notes \
+            $PRERELEASE
