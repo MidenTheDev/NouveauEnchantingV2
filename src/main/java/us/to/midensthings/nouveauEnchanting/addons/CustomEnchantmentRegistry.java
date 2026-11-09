@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /***
- * The custom enchants added by NouveauEnchanting and its addons, filled in while the server is bootstrapping.
+ * The custom enchants added by addons, filled in while the server is bootstrapping.
  */
 public class CustomEnchantmentRegistry {
     private record Entry(CustomEnchantment enchantment, String source) {}

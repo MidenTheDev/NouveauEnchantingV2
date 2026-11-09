@@ -27,7 +27,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import us.to.midensthings.nouveauEnchanting.addons.AddonLoader;
 import us.to.midensthings.nouveauEnchanting.addons.CustomEnchantment;
 import us.to.midensthings.nouveauEnchanting.addons.CustomEnchantmentRegistry;
-import us.to.midensthings.nouveauEnchanting.addons.builtin.IceAspectEnchant;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantMaterial;
 import us.to.midensthings.nouveauEnchanting.enchanting.MaterialRegistry;
 import us.to.midensthings.nouveauEnchanting.util.LegacyTagsMigrator;
@@ -54,14 +53,11 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
     File materialsYml;
     File enchantsYml;
 
-    // Custom enchants from NouveauEnchanting and its addons
+    // Custom enchants from addons
     CustomEnchantmentRegistry customEnchantments;
     AddonLoader addonLoader;
     // Settings for each custom enchant, with the defaults filled in for anything enchants.yml doesn't set
     private final Map<NamespacedKey, EnchantSettings> customEnchantSettings = new LinkedHashMap<>();
-
-    // What NouveauEnchanting's own custom enchants are registered as coming from
-    public static final String BUILTIN_SOURCE = "Nouveau Enchanting";
 
     // Equipment slot group names used in enchants.yml, the reverse of EquipmentSlotGroup.getByName
     private static final List<String> SLOT_NAMES = List.of("any", "mainhand", "offhand", "hand", "head", "chest", "legs", "feet", "armor", "body", "saddle");
@@ -107,9 +103,8 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
         // Convert enchants.yml from the old tags.yml system if it's still there
         LegacyTagsMigrator.migrate(dataDirectory, enchantsYml, logger);
 
-        // Load the custom enchants first so that materials.yml and enchants.yml can use them
+        // Load the addons' custom enchants first so that materials.yml and enchants.yml can use them
         customEnchantments = new CustomEnchantmentRegistry(logger);
-        customEnchantments.register(new IceAspectEnchant(), BUILTIN_SOURCE);
         addonLoader = new AddonLoader(logger);
         addonLoader.loadAddons(dataDirectory, customEnchantments);
         addMissingCustomEnchants();

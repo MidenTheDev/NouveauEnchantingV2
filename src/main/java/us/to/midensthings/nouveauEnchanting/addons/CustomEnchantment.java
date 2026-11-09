@@ -12,10 +12,10 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 
 /***
- * A custom enchantment added by NouveauEnchanting or an addon.
+ * A custom enchantment added by an addon.
  * <p>
  * Everything returned here is only the enchant's default. Server owners can change every setting in enchants.yml under
- * the enchant's key (e.g. nouveauenchanting:ice_aspect), the same way as vanilla enchants. When the enchant is first
+ * the enchant's key (e.g. myaddon:frost_blade), the same way as vanilla enchants. When the enchant is first
  * loaded, its defaults are added to enchants.yml so they're easy to find and edit.
  * <p>
  * Because of that, the enchant's behaviour should read its settings from {@link #getEnchantment()} (e.g. its max level)
@@ -35,7 +35,7 @@ public interface CustomEnchantment {
     String getId();
 
     /***
-     * @return the enchant's full key, e.g. nouveauenchanting:ice_aspect, or null if the namespace or ID isn't valid.
+     * @return the enchant's full key, e.g. myaddon:frost_blade, or null if the namespace or ID isn't valid.
      */
     default NamespacedKey getKey() {
         return NamespacedKey.fromString(getNamespace() + ":" + getId());

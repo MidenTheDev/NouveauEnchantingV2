@@ -8,11 +8,9 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import us.to.midensthings.nouveauEnchanting.addons.AddonLoader;
-import us.to.midensthings.nouveauEnchanting.addons.CustomEnchantment;
 import us.to.midensthings.nouveauEnchanting.addons.CustomEnchantmentRegistry;
 import us.to.midensthings.nouveauEnchanting.commands.Debug;
 import us.to.midensthings.nouveauEnchanting.commands.Enchanting;
@@ -91,14 +89,6 @@ public final class NouveauEnchanting extends JavaPlugin {
         pm.registerEvents(new InventoryClose(), this);
         // Calls ItemEnchantEvent and ItemDisenchantEvent for vanilla enchanting tables, anvils and grindstones
         pm.registerEvents(new EnchantEventBridge(), this);
-
-        // Addon enchants are registered when their addon enables
-        for (CustomEnchantment enchantment : customEnchantments.getAll()) {
-            if (enchantment instanceof Listener listener
-                    && NouveauEnchantingBootstrapper.BUILTIN_SOURCE.equals(customEnchantments.getSource(enchantment.getKey()))) {
-                pm.registerEvents(listener, this);
-            }
-        }
     }
 
     public void registerCommands() {

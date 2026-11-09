@@ -1,8 +1,8 @@
 # Every setting is optional. Leave one out (or delete the line) to keep the enchant's vanilla or datapack value.
 # See bane_of_arthropods below for an example of every setting.
 #
-# Custom enchants from Nouveau Enchanting and its addons use the same settings, under their full key
-# (e.g. nouveauenchanting:ice_aspect). Their default settings are added to the end of this file the first time they load.
+# Custom enchants from addons use the same settings, under their full key
+# (e.g. myaddon:frost_blade). Their default settings are added to the end of this file the first time they load.
 #
 # allowed-items and primary-items can list items (e.g. "mace") and item tags starting with # (e.g. "#swords").
 # Any vanilla or datapack item tag works, see https://minecraft.wiki/w/Item_tag_(Java_Edition)
@@ -53,10 +53,10 @@ bane_of_arthropods:
   #   treasure            - can't be found in enchanting tables, only in loot and trades (e.g. Mending)
   # For vanilla enchants this only adds to the tags they're already in. Custom enchants are in no tags unless they set some.
   # See https://minecraft.wiki/w/Enchantment_tag_(Java_Edition) for every tag.
-  #tags:
-  #  - "in_enchanting_table"
-  #  - "on_random_loot"
-  #  - "tradeable"
+  tags:
+    - "in_enchanting_table"
+    - "on_random_loot"
+    - "tradeable"
 
   # How expensive the enchant is to combine in an anvil. The anvil multiplies this by the level, and halves it for books.
   anvil-cost: 2
