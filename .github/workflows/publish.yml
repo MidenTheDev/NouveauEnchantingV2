@@ -1,0 +1,58 @@
+name: Publish to Maven repository
+
+on:
+  push:
+    tags: ['v*']   # runs when you push a tag like v1.2.0
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the plugin
+        uses: actions/checkout@v4
+
+      - name: Check out the Maven repository
+        uses: actions/checkout@v4
+        with:
+          repository: MidenTheDev/maven
+          ref: main
+          path: maven-repo
+          ssh-key: ${{ secrets.MAVEN_DEPLOY_KEY }}
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Check the tag matches the pom.xml version
+        run: |
+          VERSION=$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout)
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME doesn't match the pom.xml version $VERSION"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Make sure this version isn't already published
+        run: |
+          if [ -d "maven-repo/us/to/midensthings/NouveauEnchanting/$VERSION" ]; then
+            echo "::error::Version $VERSION is already published, bump the version in pom.xml"
+            exit 1
+          fi
+
+      - name: Build and deploy into the Maven repository
+        run: ./mvnw -B clean deploy -DaltDeploymentRepository=midens-repo::file:${{ github.workspace }}/maven-repo
+
+      - name: Push the new version
+        working-directory: maven-repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Publish NouveauEnchanting $VERSION"
+          git push
