@@ -10,6 +10,11 @@ play-sound-on-enchant: true
 check-for-updates: true
 # Checks Modrinth on startup and logs a message if a newer release is available.
 
+replace-enchant-command: true
+# Replaces /enchant (vanilla's, or another plugin's) with Nouveau Enchanting's version, which can add custom enchants
+# and lets addons react to the enchanting. It uses the same syntax as vanilla: /enchant <targets> <enchantment> [level]
+# Uses the nouveauenchanting.commands.enchant permission. Requires a restart to change.
+
 gui-info:
   fill-inventory: true
   # Whether or not to fill the empty slots of the enchanting gui with the filler item

@@ -12,7 +12,7 @@ import java.util.Map;
 
 /***
  * Called when a player is about to remove enchants from an item, from any source. Listen to this instead of each
- * source's own event. Currently the only way to remove enchants in vanilla is the grindstone.
+ * source's own event: grindstones (the only way to remove enchants in vanilla) and the /ne disenchant command.
  * <p>
  * The result can be changed (e.g. to remove data an enchant added to the item) or the disenchanting cancelled.
  */
@@ -25,7 +25,9 @@ public class ItemDisenchantEvent extends Event implements Cancellable {
      */
     public enum Source {
         /** Removing enchants with a grindstone. */
-        GRINDSTONE
+        GRINDSTONE,
+        /** NouveauEnchanting's /ne disenchant command. */
+        COMMAND
     }
 
     private final HumanEntity disenchanter;

@@ -25,6 +25,7 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import us.to.midensthings.nouveauEnchanting.addons.AddonLoader;
+import us.to.midensthings.nouveauEnchanting.api.NouveauEnchantingAPI;
 import us.to.midensthings.nouveauEnchanting.addons.CustomEnchantment;
 import us.to.midensthings.nouveauEnchanting.addons.CustomEnchantmentRegistry;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantMaterial;
@@ -103,8 +104,9 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
         // Convert enchants.yml from the old tags.yml system if it's still there
         LegacyTagsMigrator.migrate(dataDirectory, enchantsYml, logger);
 
-        // Load the addons' custom enchants first so that materials.yml and enchants.yml can use them
+        // Load the custom enchants from other plugins and addons first so that materials.yml and enchants.yml can use them
         customEnchantments = new CustomEnchantmentRegistry(logger);
+        NouveauEnchantingAPI.loadPendingEnchantments(customEnchantments);
         addonLoader = new AddonLoader(logger);
         addonLoader.loadAddons(dataDirectory, customEnchantments);
         addMissingCustomEnchants();

@@ -12,13 +12,13 @@ import java.util.Map;
 
 /***
  * Called when a player is about to enchant an item, from any source: NouveauEnchanting's enchanting gui, the vanilla
- * enchanting table and anvils. Listen to this instead of each source's own event.
+ * enchanting table, anvils and the /ne enchant command. Listen to this instead of each source's own event.
  * <p>
  * The result can be changed (e.g. to add data to the item) or the enchanting cancelled. Enchants that are only upgraded
  * count too, e.g. Sharpness II to III.
  * <p>
- * Items that are created already enchanted (loot, villager trades, commands like /enchant and /give) don't call this,
- * since nothing is enchanted by a player.
+ * Items that are created already enchanted (loot, villager trades, vanilla commands like /enchant and /give) don't
+ * call this, since nothing is enchanted by a player.
  */
 public class ItemEnchantEvent extends Event implements Cancellable {
 
@@ -33,7 +33,9 @@ public class ItemEnchantEvent extends Event implements Cancellable {
         /** The vanilla enchanting table. */
         ENCHANTING_TABLE,
         /** Combining items or enchanted books in an anvil. */
-        ANVIL
+        ANVIL,
+        /** NouveauEnchanting's /ne enchant command. */
+        COMMAND
     }
 
     private final HumanEntity enchanter;

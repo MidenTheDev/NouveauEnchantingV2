@@ -1,7 +1,6 @@
 package us.to.midensthings.nouveauEnchanting.events;
 
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -14,10 +13,10 @@ import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.GrindstoneInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.view.AnvilView;
 import us.to.midensthings.nouveauEnchanting.customevents.ItemDisenchantEvent;
 import us.to.midensthings.nouveauEnchanting.customevents.ItemEnchantEvent;
+import us.to.midensthings.nouveauEnchanting.util.ItemEnchantments;
 import us.to.midensthings.nouveauEnchanting.util.Schedulers;
 
 import java.util.HashMap;
@@ -38,7 +37,7 @@ public class EnchantEventBridge implements Listener {
     public void onEnchantingTable(EnchantItemEvent e) {
         ItemStack item = e.getItem().clone();
         // What vanilla will turn the item into, books become enchanted books with the enchants stored in them
-        ItemStack expected = applyEnchants(item, e.getEnchantsToAdd());
+        ItemStack expected = ItemEnchantments.with(item, e.getEnchantsToAdd());
 
         ItemEnchantEvent event = new ItemEnchantEvent(e.getEnchanter(), item, expected.clone(), new HashMap<>(e.getEnchantsToAdd()),
                 ItemEnchantEvent.Source.ENCHANTING_TABLE);
@@ -78,9 +77,9 @@ public class EnchantEventBridge implements Listener {
         }
 
         // Enchants the result has at a higher level than the item, renaming and repairing alone don't count
-        Map<Enchantment, Integer> before = getEnchants(item);
+        Map<Enchantment, Integer> before = ItemEnchantments.get(item);
         Map<Enchantment, Integer> gained = new HashMap<>();
-        getEnchants(result).forEach((enchantment, level) -> {
+        ItemEnchantments.get(result).forEach((enchantment, level) -> {
             if (level > before.getOrDefault(enchantment, 0)) {
                 gained.put(enchantment, level);
             }
@@ -111,11 +110,11 @@ public class EnchantEventBridge implements Listener {
 
         // Every enchant on the items going in, at the highest level either had
         Map<Enchantment, Integer> before = new HashMap<>();
-        getEnchants(first).forEach((enchantment, level) -> before.merge(enchantment, level, Math::max));
-        getEnchants(second).forEach((enchantment, level) -> before.merge(enchantment, level, Math::max));
+        ItemEnchantments.get(first).forEach((enchantment, level) -> before.merge(enchantment, level, Math::max));
+        ItemEnchantments.get(second).forEach((enchantment, level) -> before.merge(enchantment, level, Math::max));
 
         // Enchants the result doesn't keep (grindstones keep curses)
-        Map<Enchantment, Integer> resultEnchants = getEnchants(result);
+        Map<Enchantment, Integer> resultEnchants = ItemEnchantments.get(result);
         Map<Enchantment, Integer> removed = new HashMap<>();
         before.forEach((enchantment, level) -> {
             if (resultEnchants.getOrDefault(enchantment, 0) < level) {
@@ -167,37 +166,5 @@ public class EnchantEventBridge implements Listener {
             return cost > 0;
         }
         return cost > 0 && cost < view.getMaximumRepairCost() && player instanceof Player p && p.getLevel() >= cost;
-    }
-
-    /***
-     * @return the item's enchants, or the enchants stored in it for enchanted books.
-     */
-    private static Map<Enchantment, Integer> getEnchants(ItemStack item) {
-        Map<Enchantment, Integer> enchants = new HashMap<>();
-        if (item == null || item.isEmpty()) {
-            return enchants;
-        }
-        enchants.putAll(item.getEnchantments());
-        if (item.getItemMeta() instanceof EnchantmentStorageMeta storage) {
-            enchants.putAll(storage.getStoredEnchants());
-        }
-        return enchants;
-    }
-
-    /***
-     * @return a copy of the item with the enchants added the way the enchanting table adds them.
-     */
-    private static ItemStack applyEnchants(ItemStack item, Map<Enchantment, Integer> enchants) {
-        if (item.getType() == Material.BOOK) {
-            ItemStack book = item.withType(Material.ENCHANTED_BOOK);
-            if (book.getItemMeta() instanceof EnchantmentStorageMeta storage) {
-                enchants.forEach((enchantment, level) -> storage.addStoredEnchant(enchantment, level, true));
-                book.setItemMeta(storage);
-            }
-            return book;
-        }
-        ItemStack enchanted = item.clone();
-        enchanted.addUnsafeEnchantments(enchants);
-        return enchanted;
     }
 }

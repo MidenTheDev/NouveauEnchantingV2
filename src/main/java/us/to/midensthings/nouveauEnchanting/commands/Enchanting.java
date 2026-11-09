@@ -53,6 +53,10 @@ public class Enchanting {
 
             })))
 
+            // Enchant or disenchant the held item with any enchant from the registry, including custom enchants
+            .then(EnchantCommands.enchant())
+            .then(EnchantCommands.disenchant())
+
             .then(Commands.literal("reload").requires(source -> source.getSender().hasPermission("nouveauenchanting.commands.reload")).executes(ctx -> {
                 CommandSender sender = ctx.getSource().getSender();
                 plugin.reloadConfig();

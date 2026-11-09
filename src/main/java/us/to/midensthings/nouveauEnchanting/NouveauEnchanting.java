@@ -13,6 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import us.to.midensthings.nouveauEnchanting.addons.AddonLoader;
 import us.to.midensthings.nouveauEnchanting.addons.CustomEnchantmentRegistry;
 import us.to.midensthings.nouveauEnchanting.commands.Debug;
+import us.to.midensthings.nouveauEnchanting.commands.EnchantCommands;
 import us.to.midensthings.nouveauEnchanting.commands.Enchanting;
 import us.to.midensthings.nouveauEnchanting.enchanting.MaterialRegistry;
 import us.to.midensthings.nouveauEnchanting.events.EnchantEventBridge;
@@ -23,6 +24,7 @@ import us.to.midensthings.nouveauEnchanting.util.UpdateTracker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public final class NouveauEnchanting extends JavaPlugin {
@@ -97,6 +99,16 @@ public final class NouveauEnchanting extends JavaPlugin {
             commands.registrar().register(debugCmd.debugRootBuilder);
             Enchanting enchCmd = new Enchanting();
             commands.registrar().register(enchCmd.coreCommandBuilder);
+
+            // Replace /enchant with a version that works with custom enchants and calls the enchant events
+            if (getConfig().getBoolean("replace-enchant-command")) {
+                Set<String> labels = commands.registrar().register(EnchantCommands.vanillaStyleEnchant("enchant").build(),
+                        "Enchants the item the target players are holding, including custom enchants", List.of());
+                if (!labels.contains("enchant")) {
+                    logger.warning("Couldn't replace /enchant because another plugin already uses it. Nouveau Enchanting's version can be used as /"
+                            + String.join(" or /", labels));
+                }
+            }
         });
 
     }

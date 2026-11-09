@@ -33,6 +33,12 @@ permissions:
   nouveauenchanting.commands.gui.other:
     default: op
     description: "Allows use of /ne opengui [player]"
+  nouveauenchanting.commands.enchant:
+    default: op
+    description: "Allows use of /ne enchant <enchantment> [level]"
+  nouveauenchanting.commands.disenchant:
+    default: op
+    description: "Allows use of /ne disenchant [enchantment]"
   nouveauenchanting.commands.core:
     default: op
     description: "Allows use of /ne"
