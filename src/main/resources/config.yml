@@ -15,6 +15,12 @@ replace-enchant-command: true
 # and lets addons react to the enchanting. It uses the same syntax as vanilla: /enchant <targets> <enchantment> [level]
 # Uses the nouveauenchanting.commands.enchant permission. Requires a restart to change.
 
+generate-datapack: true
+# Nouveau Enchanting generates a datapack (plugins/NouveauEnchanting/generated-datapack) on every start. It holds the
+# custom enchants from addons and the enchants whose effects are changed in enchants.yml.
+# If the server ever fails to start with an error that mentions the pack "NouveauEnchanting/generated", set this to
+# false to start without it. Effects from enchants.yml and addons aren't used while it's off. Requires a restart.
+
 gui-info:
   fill-inventory: true
   # Whether or not to fill the empty slots of the enchanting gui with the filler item

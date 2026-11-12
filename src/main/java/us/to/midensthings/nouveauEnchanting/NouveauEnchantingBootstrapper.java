@@ -1,5 +1,6 @@
 package us.to.midensthings.nouveauEnchanting;
 
+import com.google.gson.JsonObject;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import io.papermc.paper.plugin.bootstrap.PluginProviderContext;
@@ -26,8 +27,15 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import us.to.midensthings.nouveauEnchanting.addons.AddonLoader;
 import us.to.midensthings.nouveauEnchanting.api.NouveauEnchantingAPI;
+import us.to.midensthings.nouveauEnchanting.datapack.EnchantmentDefinitions;
+import us.to.midensthings.nouveauEnchanting.datapack.GeneratedDatapack;
+import us.to.midensthings.nouveauEnchanting.datapack.VanillaData;
 import us.to.midensthings.nouveauEnchanting.addons.CustomEnchantment;
 import us.to.midensthings.nouveauEnchanting.addons.CustomEnchantmentRegistry;
+import us.to.midensthings.nouveauEnchanting.addons.YamlEnchantment;
+import us.to.midensthings.nouveauEnchanting.addons.YamlEnchantmentLoader;
+import us.to.midensthings.nouveauEnchanting.effects.EffectChanges;
+import us.to.midensthings.nouveauEnchanting.effects.EffectConfigParser;
 import us.to.midensthings.nouveauEnchanting.enchanting.EnchantMaterial;
 import us.to.midensthings.nouveauEnchanting.enchanting.MaterialRegistry;
 import us.to.midensthings.nouveauEnchanting.util.LegacyTagsMigrator;
@@ -88,6 +96,8 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
     private final Map<TagKey<Enchantment>, List<TagEntry<Enchantment>>> enchantmentTagAdditions = new LinkedHashMap<>();
     // The tags setting of custom enchants that set it in enchants.yml
     private final Map<NamespacedKey, List<String>> customEnchantTags = new LinkedHashMap<>();
+    // The effects setting of enchants that set it in enchants.yml
+    private final Map<NamespacedKey, EffectChanges> effectChanges = new LinkedHashMap<>();
 
 
 
@@ -108,7 +118,10 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
         customEnchantments = new CustomEnchantmentRegistry(logger);
         NouveauEnchantingAPI.loadPendingEnchantments(customEnchantments);
         addonLoader = new AddonLoader(logger);
+        createExampleEnchantFile();
         addonLoader.loadAddons(dataDirectory, customEnchantments);
+        // Enchants written in .yml files in the addons folder, for making custom enchants without code
+        new YamlEnchantmentLoader(logger).loadEnchantments(dataDirectory.resolve("addons"), customEnchantments);
         addMissingCustomEnchants();
 
         materialsConf = YamlConfiguration.loadConfiguration(materialsYml);
@@ -187,6 +200,13 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
 
             EnchantSettings settings = readSettings(enchant, enchantKey);
 
+            // Effects can't be changed while the enchant is loading, they go in the generated datapack instead
+            if (enchantsConf.isConfigurationSection(enchant + ".effects")) {
+                effectChanges.put(enchantKey, new EffectConfigParser(logger, "enchants.yml").parse(enchant, enchantsConf.getConfigurationSection(enchant + ".effects")));
+            } else if (enchantsConf.isSet(enchant + ".effects")) {
+                logger.warn("effects for enchant " + enchant + " in enchants.yml isn't written correctly, see bane_of_arthropods in the default enchants.yml for an example");
+            }
+
             // Custom enchants get their settings applied when they're registered instead
             if (customEnchantments.contains(enchantKey)) {
                 customEnchantSettings.put(enchantKey, settings);
@@ -218,10 +238,26 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
             addToEnchantmentTags(key, customEnchantTags.getOrDefault(key, customEnchantment.getTags()), key.asString());
         }
 
+        // Enchants with changed effects, and custom enchants, are defined in a datapack the server loads like vanilla's
+        Set<NamespacedKey> definedInDatapack = generateDatapack(context);
+
+        customEnchantSettings.forEach((key, settings) -> {
+            if (definedInDatapack.contains(key)) {
+                // The datapack adds the enchant, so its settings are applied the same way as for vanilla enchants
+                context.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.entryAdd()
+                        .newHandler(event -> applySettings(event.builder(), settings, event::getOrCreateTag))
+                        .filter(RegistryKey.ENCHANTMENT.typedKey(key)));
+            }
+        });
+
+        // Custom enchants that aren't in the datapack (it's turned off or couldn't be made) are added directly, without effects
         context.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.compose().newHandler(event ->
-                 customEnchantSettings.forEach((key, settings) ->
-                          event.registry().register(RegistryKey.ENCHANTMENT.typedKey(key),
-                                 builder -> applySettings(builder, settings, event::getOrCreateTag)))));
+                 customEnchantSettings.forEach((key, settings) -> {
+                     if (!definedInDatapack.contains(key)) {
+                         event.registry().register(RegistryKey.ENCHANTMENT.typedKey(key),
+                                 builder -> applySettings(builder, settings, event::getOrCreateTag));
+                     }
+                 })));
 
 
         // Create the tags used by the enchants. This runs again whenever datapacks are reloaded.
@@ -230,13 +266,97 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
         context.getLifecycleManager().registerEventHandler(LifecycleEvents.TAGS.preFlatten(RegistryKey.ENCHANTMENT), event ->
                 enchantmentTagAdditions.forEach((tagKey, entries) -> event.registrar().addToTag(tagKey, entries)));
 
+    }
 
+    /***
+     * Generates the datapack that defines the custom enchants and the enchants with changed effects, and tells the server to load it.
+     * @return the custom enchants that are defined in the datapack. Empty if the datapack is turned off or couldn't be made.
+     */
+    private Set<NamespacedKey> generateDatapack(BootstrapContext context) {
+        VanillaData vanillaData = new VanillaData(logger);
+        GeneratedDatapack datapack = new GeneratedDatapack(dataDirectory.resolve("generated-datapack"), logger);
+
+        // config.yml isn't loaded yet while bootstrapping
+        File configYml = dataDirectory.resolve("config.yml").toFile();
+        boolean enabled = !configYml.exists() || YamlConfiguration.loadConfiguration(configYml).getBoolean("generate-datapack", true);
+        int[] format = vanillaData.getDataPackFormat();
+
+        if (!enabled || format == null) {
+            // Writing the empty pack deletes the one from last time
+            datapack.write(format);
+            if (!effectChanges.isEmpty() || !customEnchantments.getAll().isEmpty()) {
+                logger.warn(enabled
+                        ? "Could not find the server's data pack format, so enchantment effects can't be changed or added."
+                        : "generate-datapack is turned off in config.yml, so the enchantment effects from enchants.yml and addons aren't used.");
+            }
+            return Set.of();
+        }
+
+        EnchantmentDefinitions definitions = new EnchantmentDefinitions(vanillaData, logger);
+        Set<NamespacedKey> customEnchants = new LinkedHashSet<>();
+
+        for (CustomEnchantment enchant : customEnchantments.getAll()) {
+            NamespacedKey key = enchant.getKey();
+            try {
+                JsonObject definition = definitions.createCustom(enchant);
+                EffectChanges changes = effectChanges.get(key);
+                if (changes != null && !changes.isEmpty()) {
+                    definitions.applyChanges(definition, key, changes);
+                }
+                datapack.addEnchantment(key.getNamespace(), key.getKey(), definition);
+                customEnchants.add(key);
+            } catch (Throwable e) {
+                // Throwable so an addon that's broken or built for another version can't stop the server from starting
+                logger.error("Could not make the effects of custom enchant " + key.asString() + ", it will be added without them", e);
+            }
+        }
+
+        effectChanges.forEach((key, changes) -> {
+            if (changes.isEmpty() || customEnchantments.contains(key)) {
+                return;
+            }
+            JsonObject vanilla = key.getNamespace().equals(NamespacedKey.MINECRAFT) ? vanillaData.getEnchantment(key.getKey()) : null;
+            if (vanilla == null) {
+                logger.warn("The effects of " + key.asString() + " in enchants.yml aren't used, effects can only be changed for vanilla enchants and custom enchants from addons.");
+                return;
+            }
+            // Nothing to override if every change was skipped
+            JsonObject changed = vanilla.deepCopy();
+            if (definitions.applyChanges(changed, key, changes) && !changed.equals(vanilla)) {
+                datapack.addEnchantment(key.getNamespace(), key.getKey(), changed);
+            }
+        });
+
+        if (!datapack.write(format)) {
+            return Set.of();
+        }
+        datapack.register(context);
+        return customEnchants;
     }
 
     @Override
     public JavaPlugin createPlugin(PluginProviderContext context) {
         return new NouveauEnchanting(materialRegistry,materialsConf,enchantsConf,customEnchantments,addonLoader);
         //return new NouveauEnchanting();
+    }
+
+    /***
+     * Puts an example enchant file in the addons folder the first time the folder is made.
+     * Everything in it is commented out, so it doesn't add any enchants.
+     */
+    private void createExampleEnchantFile() {
+        Path addons = dataDirectory.resolve("addons");
+        if (Files.exists(addons)) {
+            return;
+        }
+        try (InputStream in = getClass().getResourceAsStream("/example-enchants.yml")) {
+            Files.createDirectories(addons);
+            if (in != null) {
+                Files.copy(in, addons.resolve("example-enchants.yml"));
+            }
+        } catch (IOException e) {
+            logger.error("Could not create the example enchant file in the addons folder", e);
+        }
     }
 
     private void generateFile(File file, String filename) {
@@ -468,7 +588,8 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
         StringBuilder text = new StringBuilder();
         for (CustomEnchantment enchant : customEnchantments.getAll()) {
             NamespacedKey key = enchant.getKey();
-            if (configured.contains(key)) {
+            // Enchants from .yml files are already easy to edit in their own file
+            if (configured.contains(key) || enchant instanceof YamlEnchantment) {
                 continue;
             }
             String source = customEnchantments.getSource(key);

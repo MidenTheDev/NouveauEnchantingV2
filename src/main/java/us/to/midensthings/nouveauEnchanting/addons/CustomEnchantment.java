@@ -8,6 +8,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
+import us.to.midensthings.nouveauEnchanting.effects.EnchantmentEffect;
 
 import java.util.List;
 
@@ -69,6 +70,15 @@ public interface CustomEnchantment {
      * @return the enchants this one can't be on the same item with, e.g. "fire_aspect" or "#exclusive_set/damage".
      */
     default List<String> getConflicts() {
+        return List.of();
+    }
+
+    /***
+     * @return the effects the game applies for this enchant, e.g. extra damage or attribute changes. The game handles these
+     * itself wherever the enchant is, so they need no listeners. Server owners can change them in enchants.yml.
+     * They aren't used if generate-datapack is turned off in config.yml.
+     */
+    default List<EnchantmentEffect> getEffects() {
         return List.of();
     }
 

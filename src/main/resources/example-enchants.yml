@@ -1,0 +1,48 @@
+# Custom enchants can be made without any code by writing them in a .yml file in this folder.
+# Every .yml file in this folder is read, so you can have as many files as you like. Changes need a restart.
+#
+# Each enchant uses the same settings as enchants.yml (see bane_of_arthropods there for what each one does).
+# Only allowed-items is required. What the enchant does is set with effects.
+#
+# The enchant's full name is <file name>:<enchant name>, e.g. frost_blade in this file is example-enchants:frost_blade.
+# To choose the first part yourself, write the full name instead, e.g. "myserver:frost_blade":
+# Use the full name in materials.yml to make the enchant available in the enchanting gui, and in /ne enchant.
+#
+# Remove the # from the lines below to try the example enchants.
+
+#frost_blade:
+#  description: "<aqua>Frost Blade"
+#  max-level: 3
+#  allowed-items:
+#    - "#swords"
+#    - "#axes"
+#  conflicts-with:
+#    - "fire_aspect"
+#  # Lets it show up in enchanting tables and loot. Leave tags out to only get it from the enchanting gui and commands.
+#  tags:
+#    - "non_treasure"
+#    - "in_enchanting_table"
+#    - "on_random_loot"
+#  weight: 2
+#  anvil-cost: 4
+#  active-slots:
+#    - mainhand
+#  effects:
+#    # 1 extra damage at level I, and 0.5 more for every level after that
+#    damage:
+#      - add: {linear: {base: 1, per-level: 0.5}}
+#    knockback:
+#      - add: 0.5
+
+#swiftness:
+#  max-level: 2
+#  allowed-items:
+#    - "#foot_armor"
+#  active-slots:
+#    - feet
+#  effects:
+#    # 10% more movement speed per level while the boots are worn
+#    attributes:
+#      - attribute: movement_speed
+#        amount: {linear: {base: 0.1, per-level: 0.1}}
+#        operation: add_multiplied_base

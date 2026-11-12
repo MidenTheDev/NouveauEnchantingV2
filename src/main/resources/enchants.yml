@@ -4,6 +4,9 @@
 # Custom enchants from addons use the same settings, under their full key
 # (e.g. myaddon:frost_blade). Their default settings are added to the end of this file the first time they load.
 #
+# You can also make your own custom enchants without any code, by writing them in a .yml file in the addons folder.
+# See example-enchants.yml in that folder.
+#
 # allowed-items and primary-items can list items (e.g. "mace") and item tags starting with # (e.g. "#swords").
 # Any vanilla or datapack item tag works, see https://minecraft.wiki/w/Item_tag_(Java_Edition)
 # Items, enchants and tags without a namespace default to minecraft.
@@ -57,6 +60,18 @@ bane_of_arthropods:
     - "in_enchanting_table"
     - "on_random_loot"
     - "tradeable"
+
+  # Effects allow you to replace or add to vanilla enchantments using a built-in datapack.
+  # For more details on how to use Effects, visit the plugin's Wiki
+  #
+  #effects:
+  #  mode: add
+  #  knockback:
+  #    - add: {linear: {base: 0.5, per-level: 0.5}}
+  #  attributes:
+  #    - attribute: movement_speed
+  #      amount: {linear: {base: 0.02, per-level: 0.02}}
+  #      operation: add_multiplied_base
 
   # How expensive the enchant is to combine in an anvil. The anvil multiplies this by the level, and halves it for books.
   anvil-cost: 2
