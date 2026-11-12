@@ -39,11 +39,42 @@ Everything in the plugin is configurable via the materials.yml file and you can 
 
 Please note: **changes to your materials.yml file require a full server restart to apply!**
 ## ✨ Vanilla Enchant Overrides:
-Using Paper's new Registry API, this plugin allows you to directly modify the vanilla game's Enchants. Currently you can:
-- Change what items Enchants can be applied to
-- Change the max level of vanilla Enchants
+Using Paper's new Registry API, this plugin allows you to directly modify the vanilla game's Enchants. Currently you can change an Enchant's:
+- **Max level**
+- **Allowed items** - what items it can be applied to, using items or any vanilla/datapack item tag (like `#swords`)
+- **Primary items** - what items it can show up on in the vanilla enchanting table and random loot
+- **Conflicts** - which other Enchants it can't be combined with
+- **Tags** - where it can be found (enchanting tables, loot, villager trades, treasure-only, etc.)
+- **Name** - with MiniMessage formatting and translatable text
+- **Anvil cost, weight, and min/max enchanting cost**
+- **Active slots** - which equipment slots it works in
+- **Effects** - what the Enchant actually does (see below)
 
-All of this is done in the plugin's enchants.yml file, which comes pre-configured with every enchant in the game set to their vanilla values. **Updates to this file require a full server restart!**
+Every setting is optional. Anything you leave out keeps its vanilla value.
+
+### Enchant Effects
+You can also change what vanilla Enchants *do*, such as how much damage Sharpness adds or how much Protection protects you. Effects use Minecraft's own enchantment system, so they work everywhere with no extra lag. Currently you can change:
+- **Combat** - damage, damage protection, knockback, armor effectiveness, mace smash damage
+- **Durability and experience** - durability loss, Mending repair, block and mob experience
+- **Projectiles, crossbows and tridents** - ammo use, projectile count/spread/piercing, crossbow charge time, trident return speed and spin attack strength
+- **Fishing** - fishing time and luck
+- **Mob drops** - equipment drop chance
+- **Attributes** - any attribute, like movement speed, attack speed or max health, while the item is held or worn
+- **Curses** - preventing an item from dropping on death or being taken off
+
+Effects can stay the same at every level or scale with the Enchant's level. They can replace an Enchant's existing effects or be added on top of them.
+
+All of this is done in the plugin's enchants.yml file, which comes pre-configured with every enchant in the game set to their vanilla values. See the [Wiki](https://github.com/MidenTheDev/NouveauEnchantingV2/wiki) for every setting and effect. **Updates to this file require a full server restart!**
+
+## 🧪 Custom Enchants:
+Nouveau Enchanting lets you add brand new Enchants to the game. Custom Enchants work with everything above: they can be used as results in materials.yml, and every one of their settings can be changed in enchants.yml. There are three ways to make them:
+- **No code** - write the Enchant in a `.yml` file in the plugin's `addons` folder, using the same settings and effects as enchants.yml. An `example-enchants.yml` is created there to get you started.
+- **Addons** - small jar files placed in the `addons` folder. An addon can give its Enchants effects, custom behavior written in Java, or both.
+- **Other plugins** - any Paper plugin can register its own Enchants through the Nouveau Enchanting API.
+
+The plugin also has events for developers that fire whenever an item is enchanted or disenchanted, whether that's from the enchanting GUI, the vanilla enchanting table, an anvil, a grindstone or a command.
+
+See the [Wiki](https://github.com/MidenTheDev/NouveauEnchantingV2/wiki) for guides on making custom Enchants and using the API.
 
 ## 💻 Commands:
 **/ne reload** - Reloads the config.yml. Does **NOT** reload enchants.yml or materials.yml. Changes to these files require a full server restart.
@@ -56,8 +87,7 @@ All of this is done in the plugin's enchants.yml file, which comes pre-configure
 Eventually, I would like for this plugin to:
 - Modify anvil behavior to block the application of enchanted books
 - Modify Villager trades to remove enchanted books and enchanted tools (Likely as a separate plugin)
-- Allow the user to modify the functionality of vanilla enchants (Such as changing how much damage sharpness adds or how much Protection enchants protect you)
-- Have a dedicated API or other system for creating custom enchantments that natively use the new system.
+- Support more Enchant effects, such as effects that trigger when you hit something (like Fire Aspect) and effects that only apply in certain conditions (like Smite only working on undead mobs)
 
 None of the above features are currently implemented in the plugin, but are planned for future updates.
 
