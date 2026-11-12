@@ -89,7 +89,7 @@ public class YamlEnchantmentLoader {
         String fullName = name.contains(":") ? name : defaultNamespace(fileName) + ":" + name;
         NamespacedKey key = NamespacedKey.fromString(fullName.toLowerCase(Locale.ROOT));
         if (key == null) {
-            logger.warn("Skipping " + where + ", enchant names can only use lowercase letters, numbers, ., _ and -");
+            logger.warn("Skipping " + where + ", enchant names can only use lowercase letters, numbers, _ and -");
             return null;
         }
 
@@ -157,10 +157,11 @@ public class YamlEnchantmentLoader {
         return value;
     }
 
-    // my-enchants.yml -> my-enchants, with anything a namespace can't contain replaced
+    // my-enchants.yml -> my-enchants, with anything a namespace can't contain replaced.
+    // Dots are replaced too (my.enchants.yml -> my_enchants), the configs use them to separate settings
     private static String defaultNamespace(String fileName) {
         String name = fileName.substring(0, fileName.lastIndexOf('.')).toLowerCase(Locale.ROOT);
-        return name.replaceAll("[^a-z0-9._-]", "_");
+        return name.replaceAll("[^a-z0-9_-]", "_");
     }
 
     // frost_blade -> Frost Blade

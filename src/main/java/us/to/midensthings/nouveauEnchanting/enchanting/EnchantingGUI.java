@@ -19,8 +19,13 @@ import us.to.midensthings.nouveauEnchanting.compat.ItemsAdderCompat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class EnchantingGUI implements InventoryHolder {
+    private static final int GUI_SIZE = 27;
+    // So invalid slots in config.yml are only warned about once, not every time the gui is opened
+    private static volatile boolean warnedInvalidSlots = false;
+
     private final NouveauEnchanting plugin = NouveauEnchanting.getPlugin(NouveauEnchanting.class);
     FileConfiguration config = plugin.getConfig();
     private int toolSlot;
@@ -41,7 +46,21 @@ public class EnchantingGUI implements InventoryHolder {
         resultSlot = config.getInt("gui-info.result-slot");
         costPreviewSlot = config.getInt("gui-info.cost-preview-slot");
         // Create 3X9 chest gui with custom name for fontimage gui
-        inv = plugin.getServer().createInventory(this, 27, config.getString("gui-info.inventory-name", ":offset_-16::enchanting_window:"));
+        inv = plugin.getServer().createInventory(this, GUI_SIZE, config.getString("gui-info.inventory-name", ":offset_-16::enchanting_window:"));
+
+        // The four slots have to be inside the gui and all different, or items would end up in the wrong place
+        Set<Integer> slots = Set.copyOf(List.of(toolSlot, materialSlot, resultSlot, costPreviewSlot));
+        if (slots.size() != 4 || slots.stream().anyMatch(slot -> slot < 0 || slot >= GUI_SIZE)) {
+            if (!warnedInvalidSlots) {
+                warnedInvalidSlots = true;
+                plugin.getLogger().warning("The gui-info slots in config.yml must be four different numbers from 0 to " + (GUI_SIZE - 1)
+                        + ". Using the default slots (tool 10, material 12, cost preview 14, result 16) instead.");
+            }
+            toolSlot = 10;
+            materialSlot = 12;
+            costPreviewSlot = 14;
+            resultSlot = 16;
+        }
         enchHandler = new EnchHandler();
         // Load the cost preview item once instead of on every update
         costPreviewItem = loadConfigItem("gui-info.cost-preview-item", Material.ENCHANTED_BOOK);

@@ -16,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EnchHandler {
     // Enchant keys in materials.yml that don't exist in the registry, so each one is only warned about once
     private static final Set<String> warnedEnchantKeys = ConcurrentHashMap.newKeySet();
+    // Enchant levels in materials.yml without a valid cost, so each one is only warned about once
+    private static final Set<String> warnedMissingCosts = ConcurrentHashMap.newKeySet();
 
     private Enchantment currentEnchant;
     private String currentEnchantKey;
@@ -76,13 +78,28 @@ public class EnchHandler {
                 continue;
             }
 
+            // The next level needs a cost in materials.yml. Without one it would be free, e.g. when an enchant's
+            // max level is raised in enchants.yml without adding the new levels to materials.yml.
+            int nextLevel = existingLevel + 1;
+            String materialCostPath = getMaterialsPath(materialKey, enchantKey + "." + nextLevel + ".material-cost");
+            String levelCostPath = getMaterialsPath(materialKey, enchantKey + "." + nextLevel + ".level-cost");
+            int materialCost = plugin.materialsConf.getInt(materialCostPath, -1);
+            int levelCost = plugin.materialsConf.getInt(levelCostPath, -1);
+            if (!plugin.materialsConf.isInt(materialCostPath) || !plugin.materialsConf.isInt(levelCostPath) || materialCost < 0 || levelCost < 0) {
+                if (warnedMissingCosts.add(materialKey + "/" + enchantKey + "/" + nextLevel)) {
+                    plugin.getLogger().warning("Level " + nextLevel + " of " + enchantKey + " under " + materialKey + " in materials.yml needs a material-cost and a level-cost"
+                            + " (whole numbers, 0 or more). Until it has them, that level can't be applied with this material.");
+                }
+                continue;
+            }
+
             // Valid enchantment for material applied to given tool found.
             currentEnchant = enchantment;
             currentEnchantKey = enchantKey;
             currentMaterialKey = materialKey;
-            currentEnchantLevel = existingLevel + 1;
-            currentEnchantMaterialCost = plugin.materialsConf.getInt(getMaterialsPath(materialKey, enchantKey + "." + currentEnchantLevel + ".material-cost"));
-            currentEnchantLevelCost = plugin.materialsConf.getInt(getMaterialsPath(materialKey, enchantKey + "." + currentEnchantLevel + ".level-cost"));
+            currentEnchantLevel = nextLevel;
+            currentEnchantMaterialCost = materialCost;
+            currentEnchantLevelCost = levelCost;
             return true;
         }
 

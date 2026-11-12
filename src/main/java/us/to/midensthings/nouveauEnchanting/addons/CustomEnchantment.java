@@ -26,12 +26,12 @@ import java.util.List;
 public interface CustomEnchantment {
 
     /***
-     * @return the namespace of the enchant's key, e.g. the addon's name. Lowercase letters, numbers, ., _ and - only.
+     * @return the namespace of the enchant's key, e.g. the addon's name. Lowercase letters, numbers, _ and - only.
      */
     String getNamespace();
 
     /***
-     * @return the enchant's ID within its namespace. Lowercase letters, numbers, ., _, - and / only.
+     * @return the enchant's ID within its namespace. Lowercase letters, numbers, _, - and / only.
      */
     String getId();
 

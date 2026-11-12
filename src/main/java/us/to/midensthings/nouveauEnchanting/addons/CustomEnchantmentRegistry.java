@@ -23,7 +23,7 @@ public class CustomEnchantmentRegistry {
     }
 
     /***
-     * Adds a custom enchant. Enchants with an invalid key or the same key as another custom enchant are skipped.
+     * Adds a custom enchant. Enchants with an invalid key, a dot in their key, or the same key as another custom enchant are skipped.
      * @param source what added the enchant, e.g. the addon's name, used in messages
      * @return true if the enchant was added.
      */
@@ -31,7 +31,12 @@ public class CustomEnchantmentRegistry {
         NamespacedKey key = enchantment.getKey();
         if (key == null) {
             logger.warn("Skipping custom enchant " + enchantment.getNamespace() + ":" + enchantment.getId() + " from " + source
-                    + ", its namespace and ID can only use lowercase letters, numbers, ., _ and -");
+                    + ", its namespace and ID can only use lowercase letters, numbers, _ and -");
+            return false;
+        }
+        if (key.asString().contains(".")) {
+            // enchants.yml and materials.yml use dots to separate settings, so an enchant with one couldn't be configured
+            logger.warn("Skipping custom enchant " + key.asString() + " from " + source + ", custom enchant namespaces and IDs can't contain dots");
             return false;
         }
         if (key.getNamespace().equals(NamespacedKey.MINECRAFT)) {
