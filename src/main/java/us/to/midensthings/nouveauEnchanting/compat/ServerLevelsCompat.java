@@ -17,8 +17,12 @@ public class ServerLevelsCompat {
             NouveauEnchanting.getPlugin(NouveauEnchanting.class).getLogger().warning("Unknown ServerLevels system " + systemName + " in materials.yml");
             return -1;
         }
-        // generate the leveled player to retrieve the player's level in the given system
-        LeveledPlayer lp = system.generateLeveledPlayer(player);
+        // get the player's data in the given system to retrieve their level
+        LeveledPlayer lp = system.getLeveledPlayer(player);
+        if (lp == null) {
+            // The player isn't in this level system, so they haven't reached any level in it
+            return 0;
+        }
         return lp.getLevel();
     }
 }
