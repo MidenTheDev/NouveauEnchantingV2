@@ -98,6 +98,10 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
     private final Map<NamespacedKey, List<String>> customEnchantTags = new LinkedHashMap<>();
     // The effects setting of enchants that set it in enchants.yml
     private final Map<NamespacedKey, EffectChanges> effectChanges = new LinkedHashMap<>();
+    // The enchants.yml settings of vanilla (non-custom) enchants
+    private final Map<NamespacedKey, EnchantSettings> vanillaEnchantSettings = new LinkedHashMap<>();
+    // Enchants whose conflicts are set through exclusive_set in the generated datapack
+    private final Set<NamespacedKey> conflictsInDatapack = new HashSet<>();
 
 
 
@@ -220,12 +224,8 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
                 addToEnchantmentTags(enchantKey, enchantsConf.getStringList(enchant + ".tags"), enchant);
             }
 
-            context.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.entryAdd()
-                    .newHandler(event -> applySettings(event.builder(), settings, event::getOrCreateTag))
-
-                    // Filter for this specific enchant
-                    .filter(RegistryKey.ENCHANTMENT.typedKey(enchantKey))
-            );
+            // The handler is registered after the datapack is made, since conflicts may go in the datapack instead
+            vanillaEnchantSettings.put(enchantKey, settings);
 
         });
 
@@ -241,11 +241,21 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
         // Enchants with changed effects, and custom enchants, are defined in a datapack the server loads like vanilla's
         Set<NamespacedKey> definedInDatapack = generateDatapack(context);
 
+        // Enchants whose conflicts are written in the datapack as exclusive_set mustn't also look the tag up while loading.
+        // Looking up an enchantment tag from an entryAdd handler can deadlock the server on startup: the handler runs while
+        // the enchantment registry is locked, and the threads reading the other enchants' exclusive_set wait on that lock
+        // while holding the tag lookup's lock.
+        vanillaEnchantSettings.forEach((key, settings) ->
+                context.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.entryAdd()
+                        .newHandler(event -> applySettings(event.builder(), withoutDatapackConflicts(key, settings), event::getOrCreateTag))
+                        // Filter for this specific enchant
+                        .filter(RegistryKey.ENCHANTMENT.typedKey(key))));
+
         customEnchantSettings.forEach((key, settings) -> {
             if (definedInDatapack.contains(key)) {
                 // The datapack adds the enchant, so its settings are applied the same way as for vanilla enchants
                 context.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.entryAdd()
-                        .newHandler(event -> applySettings(event.builder(), settings, event::getOrCreateTag))
+                        .newHandler(event -> applySettings(event.builder(), withoutDatapackConflicts(key, settings), event::getOrCreateTag))
                         .filter(RegistryKey.ENCHANTMENT.typedKey(key)));
             }
         });
@@ -303,29 +313,61 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
                 if (changes != null && !changes.isEmpty()) {
                     definitions.applyChanges(definition, key, changes);
                 }
+                EnchantSettings settings = customEnchantSettings.get(key);
+                boolean hasConflicts = settings != null && settings.conflicts().isPresent();
+                if (hasConflicts) {
+                    definition.addProperty("exclusive_set", "#" + settings.conflicts().get().key().asString());
+                }
                 datapack.addEnchantment(key.getNamespace(), key.getKey(), definition);
                 customEnchants.add(key);
+                if (hasConflicts) {
+                    conflictsInDatapack.add(key);
+                }
             } catch (Throwable e) {
                 // Throwable so an addon that's broken or built for another version can't stop the server from starting
                 logger.error("Could not make the effects of custom enchant " + key.asString() + ", it will be added without them", e);
             }
         }
 
-        effectChanges.forEach((key, changes) -> {
-            if (changes.isEmpty() || customEnchantments.contains(key)) {
-                return;
+        // Vanilla enchants with changed effects or conflicts get overridden in the datapack
+        Set<NamespacedKey> vanillaOverrides = new LinkedHashSet<>(effectChanges.keySet());
+        vanillaEnchantSettings.forEach((key, settings) -> {
+            if (settings.conflicts().isPresent()) {
+                vanillaOverrides.add(key);
+            }
+        });
+
+        for (NamespacedKey key : vanillaOverrides) {
+            if (customEnchantments.contains(key)) {
+                continue;
+            }
+            EffectChanges changes = effectChanges.get(key);
+            boolean changesEffects = changes != null && !changes.isEmpty();
+            EnchantSettings settings = vanillaEnchantSettings.get(key);
+            Optional<TagKey<Enchantment>> conflicts = settings == null ? Optional.empty() : settings.conflicts();
+            if (!changesEffects && conflicts.isEmpty()) {
+                continue;
             }
             JsonObject vanilla = key.getNamespace().equals(NamespacedKey.MINECRAFT) ? vanillaData.getEnchantment(key.getKey()) : null;
             if (vanilla == null) {
-                logger.warn("The effects of " + key.asString() + " in enchants.yml aren't used, effects can only be changed for vanilla enchants and custom enchants from addons.");
-                return;
+                // Conflicts still work without the datapack, they're set when the enchant loads instead
+                if (changesEffects) {
+                    logger.warn("The effects of " + key.asString() + " in enchants.yml aren't used, effects can only be changed for vanilla enchants and custom enchants from addons.");
+                }
+                continue;
             }
-            // Nothing to override if every change was skipped
             JsonObject changed = vanilla.deepCopy();
-            if (definitions.applyChanges(changed, key, changes) && !changed.equals(vanilla)) {
-                datapack.addEnchantment(key.getNamespace(), key.getKey(), changed);
+            // If the effects can't be used the definition is left as it was, but the conflicts can still be set
+            if (changesEffects) {
+                definitions.applyChanges(changed, key, changes);
             }
-        });
+            conflicts.ifPresent(tag -> changed.addProperty("exclusive_set", "#" + tag.key().asString()));
+            // Nothing to override if every change was skipped
+            if (!changed.equals(vanilla)) {
+                datapack.addEnchantment(key.getNamespace(), key.getKey(), changed);
+                conflicts.ifPresent(tag -> conflictsInDatapack.add(key));
+            }
+        }
 
         if (!datapack.write(format)) {
             return Set.of();
@@ -501,6 +543,18 @@ public class NouveauEnchantingBootstrapper implements PluginBootstrap {
             enchantmentTagAdditions.computeIfAbsent(TagKey.create(RegistryKey.ENCHANTMENT, tagKey), k -> new ArrayList<>())
                     .add(TagEntry.valueEntry(TypedKey.create(RegistryKey.ENCHANTMENT, enchantKey), false));
         }
+    }
+
+    /***
+     * @return the settings without conflicts if they're already set through exclusive_set in the generated datapack.
+     */
+    private EnchantSettings withoutDatapackConflicts(NamespacedKey key, EnchantSettings s) {
+        if (!conflictsInDatapack.contains(key)) {
+            return s;
+        }
+        return new EnchantSettings(s.maxLevel(), s.anvilCost(), s.weight(), s.minCostBase(), s.minCostPerLevel(),
+                s.maxCostBase(), s.maxCostPerLevel(), s.description(), s.activeSlots(), s.supportedItems(), s.primaryItems(),
+                Optional.empty());
     }
 
     private static EnchantSettings emptySettings() {
